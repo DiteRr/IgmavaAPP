@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from datetime import datetime
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets#works for pyqt5
 import qdarkstyle
 
 class Reservas(QtWidgets.QWidget):
@@ -209,14 +209,13 @@ class SecondTab(QWidget):
         botom.setObjectName("botom")
         botom.setText("Search")
 
-
-        listwidget = QListWidget()
-        list = []
-
-        for i in range(0,40):
-            list.append("Cliente" + str(i+1))
+        self.tableWidget = QTableWidget()
+        #self.tableWidget.setRowCount(1000)  
+        self.tableWidget.setColumnCount(6)
+        self.tableWidget.setHorizontalHeaderLabels("Contacto;Correo;Nombre;Procedencia;RUT;Telefono".split(";"))
+        #self.tableWidget.horizontalHeaderItem().setTextAlignment(Qt.AlignHCenter)
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         
-        listwidget.insertItems(0, list)
 
 
         layout = QVBoxLayout()
@@ -226,16 +225,25 @@ class SecondTab(QWidget):
         layoutH.addWidget(botom)
 
         layoutV = QVBoxLayout()
-        layoutV.addWidget(listwidget)
+        layoutV.addWidget(self.tableWidget)
 
         layout.addLayout(layoutH)
         layout.addLayout(layoutV)
         self.setLayout(layout)
 
+        self.despliegue()
     
-
-    
-
+    def despliegue(self):
+        result = requests.get('http://127.0.0.1:8007//clientes')       
+        customers = result.json()['data']
+        self.tableWidget.setRowCount(0)
+        for row_number, row_data in enumerate(customers):
+            #print(row_number)
+            self.tableWidget.insertRow(row_number)
+            for column_number, data in enumerate(row_data.values()):
+                #print(data)
+                self.tableWidget.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+                
 class ThirdTab(QWidget):
     def __init__(self):
         super().__init__()
