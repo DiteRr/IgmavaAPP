@@ -37,7 +37,7 @@ class Reservas(QtWidgets.QWidget):
         
          self.groupBoxCliente= QtWidgets.QGroupBox("Cliente")
 
-         self.cliente = QtWidgets.QLineEdit()
+         self.cliente = QtWidgets.QLineEdit("hola")
 
         
          self.hbox2 = QtWidgets.QHBoxLayout()
@@ -206,7 +206,7 @@ class SecondTab(QWidget):
         # Especifica dónde deben aparecer los puntos suspensivos "..." cuando se muestran
         # textos que no encajan
         self.tableWidget.setTextElideMode(Qt.ElideRight)# Qt.ElideNone
-        # Establecer el ajuste de palabras del texto 
+        # Establecer el ajuste de palabrasineEdit del texto 
         self.tableWidget.setWordWrap(False)
         # Deshabilitar clasificación
         self.tableWidget.setSortingEnabled(False)
@@ -249,8 +249,8 @@ class SecondTab(QWidget):
         self.tableWidget.itemDoubleClicked.connect(self.clienteParticular)
 
         # Menú contextual
-        self.tableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tableWidget.customContextMenuRequested.connect(self.menuContextual)
+        #self.tableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        #self.tableWidget.customContextMenuRequested.connect(self.menuContextual)
     
     def despliegue(self):
         result = requests.get('http://127.0.0.1:8007//clientes')       
@@ -268,63 +268,36 @@ class SecondTab(QWidget):
         
         customer = [dato.text() for dato in self.tableWidget.selectedItems()]
         print(customer[3])
-        self.viewCustomer = ViewCustomer()
-        #self.viewCustomer.input1.setText(str(customer))
+        self.viewCustomer = ViewCustomer(customer)
         
-        self.viewCustomer.tableCustomer.setItem(0, 0, QTableWidgetItem(customer[0]))
+        """self.viewCustomer.tableCustomer.setItem(0, 0, QTableWidgetItem(customer[0]))
         self.viewCustomer.tableCustomer.setItem(0, 1, QTableWidgetItem(customer[1]))
         self.viewCustomer.tableCustomer.setItem(0, 2, QTableWidgetItem(customer[2]))
         self.viewCustomer.tableCustomer.setItem(0, 3, QTableWidgetItem(customer[3]))
         self.viewCustomer.tableCustomer.setItem(0, 4, QTableWidgetItem(customer[4]))
-        self.viewCustomer.tableCustomer.setItem(0, 5, QTableWidgetItem(customer[5]))
-        
+        self.viewCustomer.tableCustomer.setItem(0, 5, QTableWidgetItem(customer[5]))"""
+
+        """self.editCustomer = EditCustomer()
+        self.editCustomer.rut = QtWidgets.QLabel(customer[0])
+        self.editCustomer.nombre = QtWidgets.QLineEdit(customer[1])
+        self.editCustomer.procedencia = QtWidgets.QLineEdit(customer[2])
+        self.editCustomer.telefono = QtWidgets.QLineEdit(customer[3])
+        self.editCustomer.correo = QtWidgets.QLineEdit(customer[4])
+        self.editCustomer.contacto = QtWidgets.QLineEdit(customer[5])"""
+       
         self.viewCustomer.show()
 
         #filaSeleccionada = [dato.text() for dato in self.tableWidget.selectedItems()]
         #print(filaSeleccionada)
         #QMessageBox.warning(self, "Probando", filaSeleccionada + ", celda seleccionada {}.   ".format(celda.text()), QMessageBox.Ok)
-    
-    
-    def menuContextual(self, posicion):
-        indices = self.tableWidget.selectedIndexes()
-
-        if indices:
-            menu = QMenu()
-
-            itemsGrupo = QActionGroup(self)
-            itemsGrupo.setExclusive(True)
-            
-            menu.addAction(QAction("Copiar todo", itemsGrupo))
-
-            columnas = [self.tableWidget.horizontalHeaderItem(columna).text()
-                        for columna in range(self.tableWidget.columnCount())
-                        if not self.tableWidget.isColumnHidden(columna)]
-
-            copiarIndividual = menu.addMenu("Copiar individual") 
-            for indice, item in enumerate(columnas, start=0):
-                accion = QAction(item, itemsGrupo)
-                accion.setData(indice)
-                
-                copiarIndividual.addAction(accion)
-
-            itemsGrupo.triggered.connect(self.copiarTableWidgetItem)
-            
-            menu.exec_(self.tableWidget.viewport().mapToGlobal(posicion))
-
-    def copiarTableWidgetItem(self, accion):
-        filaSeleccionada = [dato.text() for dato in self.tableWidget.selectedItems()]
-            
-        if accion.text() == "Copiar todo":
-            filaSeleccionada = tuple(filaSeleccionada)
-        else:
-            filaSeleccionada = filaSeleccionada[accion.data()]
 
 class ViewCustomer(QWidget):
-    def __init__(self):
+    def __init__(self, customer):
         super().__init__()
+        self.customer = customer
+        #print(self.customer)
         self.setWindowTitle("Customer")
         
-
         #--#
         self.mainLayout = QVBoxLayout()
 
@@ -347,6 +320,21 @@ class ViewCustomer(QWidget):
         self.tableCustomer.verticalHeader().setDefaultSectionSize(180)
 
 
+        #--# Table customer
+        self.tableCustomer.setItem(0, 0, QTableWidgetItem(self.customer[0]))
+        self.tableCustomer.setItem(0, 1, QTableWidgetItem(self.customer[1]))
+        self.tableCustomer.setItem(0, 2, QTableWidgetItem(self.customer[2]))
+        self.tableCustomer.setItem(0, 3, QTableWidgetItem(self.customer[3]))
+        self.tableCustomer.setItem(0, 4, QTableWidgetItem(self.customer[4]))
+        self.tableCustomer.setItem(0, 5, QTableWidgetItem(self.customer[5]))
+
+        #--#Loading
+        
+        self.label_animation =  QLabel(self)
+        self.movie = QMovie('Loading_2.gif')
+        self.label_animation.setMovie(self.movie)
+
+
         #--# Buttons
         self.edit = QtWidgets.QPushButton("Editar")
         self.sendEmail = QtWidgets.QPushButton("Enviar Correo")
@@ -359,6 +347,7 @@ class ViewCustomer(QWidget):
         self.layoutV = QVBoxLayout()
         self.layoutV.addWidget(self.tableCustomer)
         self.layoutV.addLayout(self.layoutButtons)
+        #self.layoutV.addWidget(self.label_animation)
         
         #--# GroupBoxFecha
         self.checkinC = QtWidgets.QCalendarWidget()
@@ -386,19 +375,19 @@ class ViewCustomer(QWidget):
         #==EVENTOS==#
 
         self.edit.clicked.connect(self.editCustomer)
-        #self.sendEmail.clicked.connect(self.emailSend)
+        self.sendEmail.clicked.connect(self.emailSend)
 
     def editCustomer(self):
         self.hide()
-
-        self.editC = EditCustomer()     
+        self.editC = EditCustomer(self.customer)   
         self.editC.show()
     
-    """def emailSend(self):
+    def emailSend(self):
+        
         def simpleSend(recver,subject,messag):
             defaultSend="igmavamailtest@gmail.com"
             defaultPass="ismabaya"
-            return sendMail(defaultSend,defaultPass,recver,subject,messag)
+            sendMail(defaultSend,defaultPass,recver,subject,messag)
 
         def sendMail(sender,sendpass,recver,subject,messag):
             message = MIMEMultipart()
@@ -413,64 +402,64 @@ class ViewCustomer(QWidget):
                 session.login(sender, sendpass)
                 session.sendmail(sender, recver, text)
                 session.quit()
-                return "Correo Enviado"
+                self.movie.stop()
+                QMessageBox.warning(self, "", "¡ Correo enviado !", QMessageBox.Ok)
             except:
-                return "Ocurrio Error"
-        
-        result = moroseMail("Abada Kadabra",50000,"igmavamailtest@gmail.com")
-    
+                self.movie.stop()
+                QMessageBox.warning(self, "", "¡ Ocurrio un error !",QMessageBox.Ok)
+           
         def moroseMail(name,debt,mail):
             asunto="Importante: Comunicado sobre deuda Cabañas Igmava."
-            cuerpo=""""""Estimado/a Sr./Sra. {},
+            cuerpo="""Estimado/a Sr./Sra. {},
     
             Le escribimos para comunircarle que actualmente debe el pago de ${} por su estadía.
             Le rogamos realize el deposito a la cuenta bancaria indicada lo antes posible.
             Si tiene alguna consulta puede contactarnos al telefono indicado.
     
             Cuenta: XXXX-XXXX-XXXX
-            Fono: XXXX-XXXX-XXXX"""""".format(name,debt)
-            return simpleSend(mail,asunto,cuerpo)
+            Fono: XXXX-XXXX-XXXX""".format(name,debt)
+            simpleSend(mail,asunto,cuerpo)
     
-        result = moroseMail("Abada Kadabra",50000,"igmavamailtest@gmail.com")"""
+        self.movie.start()
+        moroseMail("Abada Kadabra",50000,"igmavamailtest@gmail.com")
     
 
 class EditCustomer(QWidget):
-    def __init__(self):
+    def __init__(self, customer):
         super().__init__()
-
+        self.setWindowTitle("Editar cliente")
+        self.customer = customer
+        self.rut = customer[4]
+        #print(self.rut)
+        #print(customer)
         #--#
         self.nombreC= QtWidgets.QGroupBox("Nombre")
-        self.nombre= QtWidgets.QLineEdit()
+        self.nombre= QtWidgets.QLineEdit(customer[2])
         self.layout1 = QHBoxLayout()
         self.layout1.addWidget(self.nombre)
         self.nombreC.setLayout(self.layout1)
 
-        self.rutC= QtWidgets.QGroupBox("RUT") 
-        self.rut = QtWidgets.QLineEdit()
-        self.layout2 = QHBoxLayout()
-        self.layout2.addWidget(self.rut)
-        self.rutC.setLayout(self.layout2)
 
         self.proceC= QtWidgets.QGroupBox("Procedencia")
-        self.proce = QtWidgets.QLineEdit() 
+        self.proce = QtWidgets.QLineEdit(customer[3]) 
         self.layout3 = QHBoxLayout()
         self.layout3.addWidget(self.proce)
         self.proceC.setLayout(self.layout3)
 
         self.telefonoC= QtWidgets.QGroupBox("Telefono") 
-        self.telefono = QtWidgets.QLineEdit()
+        self.telefono = QtWidgets.QLineEdit(customer[5])
         self.layout4 = QHBoxLayout()
         self.layout4.addWidget(self.telefono)
         self.telefonoC.setLayout(self.layout4)
 
         self.correoC= QtWidgets.QGroupBox("Correo")
-        self.correo = QtWidgets.QLineEdit()
+        self.correo = QtWidgets.QLineEdit(customer[1])
         self.layout5 = QHBoxLayout()
         self.layout5.addWidget(self.correo)
         self.correoC.setLayout(self.layout5)
         
         self.contactoC= QtWidgets.QGroupBox("Contacto")
-        self.contacto = QtWidgets.QLineEdit()
+        self.contacto = QtWidgets.QLineEdit(customer[0])
         self.layout6 = QHBoxLayout()
         self.layout6.addWidget(self.contacto)
         self.contactoC.setLayout(self.layout6)
@@ -488,7 +477,6 @@ class EditCustomer(QWidget):
         self.mainlayout = QVBoxLayout()
         
         self.mainlayout.addWidget(self.nombreC)
-        self.mainlayout.addWidget(self.rutC)
         self.mainlayout.addWidget(self.proceC)
         self.mainlayout.addWidget(self.telefonoC)
         self.mainlayout.addWidget(self.correoC)
@@ -499,9 +487,35 @@ class EditCustomer(QWidget):
 
          # == EVENTOS == #
         
-        #self.save.clicked.connect(self.)
-        #self.canceledit.clicked.connect(self.)
+        self.save.clicked.connect(self.saveChanges)
+        self.cancel.clicked.connect(self.canceled)
 
+    def canceled(self):
+        
+        self.hide()
+        self.viewCustomer = ViewCustomer(self.customer)
+        self.viewCustomer.show()
+    
+    def saveChanges(self):
+        rut = self.rut
+        nombre = self.nombre.text()
+        procedencia = self.proce.text()
+        telefono = self.telefono.text()
+        correo = self.correo.text()
+        contacto = self.contacto.text()
+        customer = {'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
+        r = requests.put('http://127.0.0.1:8007/clientes/{}'.format(rut), json = customer)
+        #print(r)
+        #if(r == "<Response [200]>"):
+        self.customer[0] = contacto 
+        self.customer[1] = correo
+        self.customer[2] = nombre
+        self.customer[3] = procedencia
+        self.customer[5] = telefono
+            
+        self.hide()
+        self.viewCustomer = ViewCustomer(self.customer)
+        self.viewCustomer.show()
          
 class ThirdTab(QWidget):
     def __init__(self):

@@ -42,6 +42,7 @@ class Clientes_rut(Resource):
 
     def put(self, rut):
         data = request.json
+        print(data)
         conn = db_connect.connect()
         query = conn.execute("update Cliente set nombre='{}', procedencia='{}', telefono={}, correo='{}', contacto='{}' where RUT='{}'".format(
                              data['nombre'],
