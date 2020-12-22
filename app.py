@@ -16,6 +16,9 @@ class Reservas(QtWidgets.QWidget):
     def __init__(self):
          #super().__init__()
          super().__init__()
+         self.setWindowFlags(Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint |
+                            Qt.MSWindowsFixedSizeDialogHint)
+         self.setFixedSize(700, 500)
 
          self.setWindowTitle("Reservas IGMAVA")
 
@@ -130,7 +133,10 @@ class TabWidget(QWidget):
     def __init__(self):
         super().__init__()
         #QMainWindow.__init__(self)
-        self.resize(800, 600)
+        self.setWindowFlags(Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint |
+                            Qt.MSWindowsFixedSizeDialogHint)
+        self.setFixedSize(700, 500)
+        #self.resize(800, 600)
         self.setWindowTitle("IGMAVA")
         self.setWindowIcon(QIcon("myicon.png"))
 
@@ -139,20 +145,20 @@ class TabWidget(QWidget):
         #Fijar el tamaño máximo
         self.setMaximumSize(800, 600)
 
-        tabwidget = QtWidgets.QTabWidget()
-        tabwidget.addTab(FirstTab(), "Calendario")
-        tabwidget.addTab(SecondTab(), "Clientes")
-        tabwidget.addTab(ThirdTab(), "Cabañas")
+        self.tabwidget = QtWidgets.QTabWidget()
+        self.tabwidget.addTab(FirstTab(), "Calendario")
+        self.tabwidget.addTab(SecondTab(), "Clientes")
+        self.tabwidget.addTab(ThirdTab(), "Cabañas")
 
         #buttonbox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
         #buttonbox.accepted.connect(self)
 
-        vbox = QVBoxLayout()
-        vbox.addWidget(tabwidget)
+        self.vbox = QVBoxLayout()
+        self.vbox.addWidget(self.tabwidget)
         #vbox.addWidget(buttonbox)
 
-        self.setLayout(vbox)
+        self.setLayout(self.vbox)
 
 
 class FirstTab(QWidget):
@@ -177,18 +183,16 @@ class FirstTab(QWidget):
          self.main.show()
 
 
-
 class SecondTab(QWidget):
     def __init__(self):
         super().__init__()
 
 
-        search = QLineEdit()
-        search.setObjectName("buscador")
-        search.setText("Buscar")
-        botom = QtWidgets.QPushButton()
-        botom.setObjectName("botom")
-        botom.setText("Search")
+        self.search = QLineEdit()
+        self.search.setObjectName("buscador")
+        self.botom = QtWidgets.QPushButton()
+        self.botom.setObjectName("botom")
+        self.botom.setText("Search")
 
         self.tableWidget = QTableWidget()
         # Establecer el número de columnas
@@ -230,30 +234,31 @@ class SecondTab(QWidget):
         
 
         # Layouts #
-        layout = QVBoxLayout()
+        self.layout = QVBoxLayout()
         
-        layoutH = QHBoxLayout()
-        layoutH.addWidget(search)
-        layoutH.addWidget(botom)
+        self.layoutH = QHBoxLayout()
+        self.layoutH.addWidget(self.search)
+        self.layoutH.addWidget(self.botom)
 
-        layoutV = QVBoxLayout()
-        layoutV.addWidget(self.tableWidget)
+        self.layoutV = QVBoxLayout()
+        self.layoutV.addWidget(self.tableWidget)
 
-        layout.addLayout(layoutH)
-        layout.addLayout(layoutV)
-        self.setLayout(layout)
+        self.layout.addLayout(self.layoutH)
+        self.layout.addLayout(self.layoutV)
+        self.setLayout(self.layout)
 
         # == EVENTOS == #
 
         self.despliegue()
         self.tableWidget.itemDoubleClicked.connect(self.clienteParticular)
+        self.botom.clicked.connect(self.searchRut)
 
         # Menú contextual
         #self.tableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         #self.tableWidget.customContextMenuRequested.connect(self.menuContextual)
     
     def despliegue(self):
-        result = requests.get('http://127.0.0.1:8007//clientes')       
+        result = requests.get('http://127.0.0.1:8007//clientes')     
         customers = result.json()['data']
         self.tableWidget.setRowCount(0)
         for row_number, row_data in enumerate(customers):
@@ -263,28 +268,31 @@ class SecondTab(QWidget):
                 #print(data)
                 self.tableWidget.setItem(row_number, column_number, QTableWidgetItem(str(data)))
     
+    def searchRut(self):
+        rut = self.search.text()
+        try:
+            r = requests.get('http://127.0.0.1:8007//clientes/{}'.format(rut))
+            customer = r.json()['data'][0]
+            #print(customer)
+            self.tableWidget.setRowCount(1) 
+            self.tableWidget.setItem(0, 0, QTableWidgetItem(customer['Contacto']))
+            self.tableWidget.setItem(0, 1, QTableWidgetItem(customer['Correo']))
+            self.tableWidget.setItem(0, 2, QTableWidgetItem(customer['Nombre']))
+            self.tableWidget.setItem(0, 3, QTableWidgetItem(customer['Procedencia']))
+            self.tableWidget.setItem(0, 4, QTableWidgetItem(customer['RUT']))
+            self.tableWidget.setItem(0, 5, QTableWidgetItem(str(customer['Telefono'])))
+        except:
+             print("Rut inexistente")
+
+    
     def clienteParticular(self, celda):
-        #self.hide()
+        self.tab = TabWidget()
+        self.tab.hide()
+        self.hide()
         
         customer = [dato.text() for dato in self.tableWidget.selectedItems()]
         print(customer[3])
-        self.viewCustomer = ViewCustomer(customer)
-        
-        """self.viewCustomer.tableCustomer.setItem(0, 0, QTableWidgetItem(customer[0]))
-        self.viewCustomer.tableCustomer.setItem(0, 1, QTableWidgetItem(customer[1]))
-        self.viewCustomer.tableCustomer.setItem(0, 2, QTableWidgetItem(customer[2]))
-        self.viewCustomer.tableCustomer.setItem(0, 3, QTableWidgetItem(customer[3]))
-        self.viewCustomer.tableCustomer.setItem(0, 4, QTableWidgetItem(customer[4]))
-        self.viewCustomer.tableCustomer.setItem(0, 5, QTableWidgetItem(customer[5]))"""
-
-        """self.editCustomer = EditCustomer()
-        self.editCustomer.rut = QtWidgets.QLabel(customer[0])
-        self.editCustomer.nombre = QtWidgets.QLineEdit(customer[1])
-        self.editCustomer.procedencia = QtWidgets.QLineEdit(customer[2])
-        self.editCustomer.telefono = QtWidgets.QLineEdit(customer[3])
-        self.editCustomer.correo = QtWidgets.QLineEdit(customer[4])
-        self.editCustomer.contacto = QtWidgets.QLineEdit(customer[5])"""
-       
+        self.viewCustomer = ViewCustomer(customer)       
         self.viewCustomer.show()
 
         #filaSeleccionada = [dato.text() for dato in self.tableWidget.selectedItems()]
@@ -294,6 +302,7 @@ class SecondTab(QWidget):
 class ViewCustomer(QWidget):
     def __init__(self, customer):
         super().__init__()
+        self.setFixedSize(700, 500)
         self.customer = customer
         #print(self.customer)
         self.setWindowTitle("Customer")
@@ -427,6 +436,7 @@ class ViewCustomer(QWidget):
 class EditCustomer(QWidget):
     def __init__(self, customer):
         super().__init__()
+        self.setFixedSize(700, 500)
         self.setWindowTitle("Editar cliente")
         self.customer = customer
         self.rut = customer[4]
