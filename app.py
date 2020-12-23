@@ -5,8 +5,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from datetime import datetime
-from PyQt5 import QtCore, QtGui, QtWidgets#works for pyqt5
-import qdarkstyle
+from PyQt5 import QtCore, QtGui, QtWidgets
+#import qdarkstyle
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -126,40 +126,59 @@ class Reservas(QtWidgets.QWidget):
          
          print(r.json()['data'])
 
-
-             
-
-class TabWidget(QWidget):
+class Manager(QMainWindow):
     def __init__(self):
         super().__init__()
+        QMainWindow.__init__(self)
+        self.setWindowTitle("Igmava")
+        self.setWindowFlags(Qt.WindowCloseButtonHint |
+                            Qt.MSWindowsFixedSizeDialogHint)
+        self.setFixedSize(700, 500)
+
+
+        self.tabs = TabWidget(self)
+        self.tabs.customer_tab.tableWidget.itemDoubleClicked.connect(self.windowCustomer)
+
+        self.show()
+
+    def windowCustomer(self):
+        self.hide()       
+        customer = [dato.text() for dato in self.tabs.customer_tab.tableWidget.selectedItems()]
+        #print(customer[3])
+        self.viewCustomer = ViewCustomer(customer) 
+        self.viewCustomer.show()
+
+
+class TabWidget(QWidget):
+    def __init__(self, *args, **kwargs):
+        super(QWidget, self).__init__(*args, **kwargs)
         #QMainWindow.__init__(self)
         self.setWindowFlags(Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint |
                             Qt.MSWindowsFixedSizeDialogHint)
         self.setFixedSize(700, 500)
         #self.resize(800, 600)
         self.setWindowTitle("IGMAVA")
-        self.setWindowIcon(QIcon("myicon.png"))
-
+        self.setWindowIcon(QIcon("myicon.png"))       
+        
         #self.showMaximized()
         self.setMinimumSize(500, 500)
         #Fijar el tamaño máximo
         self.setMaximumSize(800, 600)
 
+        self.cal_tab = FirstTab()
+        self.customer_tab = SecondTab()
+        self.cabins_tab = ThirdTab()
+
         self.tabwidget = QtWidgets.QTabWidget()
-        self.tabwidget.addTab(FirstTab(), "Calendario")
-        self.tabwidget.addTab(SecondTab(), "Clientes")
-        self.tabwidget.addTab(ThirdTab(), "Cabañas")
+        self.tabwidget.addTab(self.cal_tab, "Calendario")
+        self.tabwidget.addTab(self.customer_tab, "Clientes")
+        self.tabwidget.addTab(self.cabins_tab, "Cabañas")
 
-        #buttonbox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-
-        #buttonbox.accepted.connect(self)
 
         self.vbox = QVBoxLayout()
         self.vbox.addWidget(self.tabwidget)
-        #vbox.addWidget(buttonbox)
 
         self.setLayout(self.vbox)
-
 
 class FirstTab(QWidget):
     def __init__(self):
@@ -190,9 +209,10 @@ class SecondTab(QWidget):
 
         self.search = QLineEdit()
         self.search.setObjectName("buscador")
+        self.search.setPlaceholderText("Ingrese RUT")
         self.botom = QtWidgets.QPushButton()
         self.botom.setObjectName("botom")
-        self.botom.setText("Search")
+        self.botom.setText("Buscar")
 
         self.tableWidget = QTableWidget()
         # Establecer el número de columnas
@@ -225,7 +245,7 @@ class SecondTab(QWidget):
         # Hacer que la última sección visible del encabezado ocupa todo el espacio disponible
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         # Ocultar encabezado vertical
-        #self.tableWidget.vertself.tabla.verticalHeader().setVisible(False)icalHeader().setVisible(False)
+        #self.tableWidget.vertself.tabla.veronfticalHeader().setVisible(False)icalHeader().setVisible(False)
         # Dibujar el fondo usando colores alternados
         self.tableWidget.setAlternatingRowColors(True)
         # Establecer altura de las filas
@@ -250,7 +270,7 @@ class SecondTab(QWidget):
         # == EVENTOS == #
 
         self.despliegue()
-        self.tableWidget.itemDoubleClicked.connect(self.clienteParticular)
+        #self.tableWidget.itemDoubleClicked.connect(self.clienteParticular)
         self.botom.clicked.connect(self.searchRut)
 
         # Menú contextual
@@ -270,42 +290,37 @@ class SecondTab(QWidget):
     
     def searchRut(self):
         rut = self.search.text()
-        try:
-            r = requests.get('http://127.0.0.1:8007//clientes/{}'.format(rut))
-            customer = r.json()['data'][0]
-            #print(customer)
-            self.tableWidget.setRowCount(1) 
-            self.tableWidget.setItem(0, 0, QTableWidgetItem(customer['Contacto']))
-            self.tableWidget.setItem(0, 1, QTableWidgetItem(customer['Correo']))
-            self.tableWidget.setItem(0, 2, QTableWidgetItem(customer['Nombre']))
-            self.tableWidget.setItem(0, 3, QTableWidgetItem(customer['Procedencia']))
-            self.tableWidget.setItem(0, 4, QTableWidgetItem(customer['RUT']))
-            self.tableWidget.setItem(0, 5, QTableWidgetItem(str(customer['Telefono'])))
-        except:
-             print("Rut inexistente")
+        if(rut == ''):
+            self.despliegue()
+        else:
+            try:
+                r = requests.get('http://127.0.0.1:8007//clientes/{}'.format(rut))
+                customer = r.json()['data'][0]
+                #print(customer)
+                self.tableWidget.setRowCount(1) 
+                self.tableWidget.setItem(0, 0, QTableWidgetItem(customer['Contacto']))
+                self.tableWidget.setItem(0, 1, QTableWidgetItem(customer['Correo']))
+                self.tableWidget.setItem(0, 2, QTableWidgetItem(customer['Nombre']))
+                self.tableWidget.setItem(0, 3, QTableWidgetItem(customer['Procedencia']))
+                self.tableWidget.setItem(0, 4, QTableWidgetItem(customer['RUT']))
+                self.tableWidget.setItem(0, 5, QTableWidgetItem(str(customer['Telefono'])))
+            except:
+                print("Rut inexistente")
 
-    
-    def clienteParticular(self, celda):
-        self.tab = TabWidget()
-        self.tab.hide()
-        self.hide()
-        
-        customer = [dato.text() for dato in self.tableWidget.selectedItems()]
-        print(customer[3])
-        self.viewCustomer = ViewCustomer(customer)       
-        self.viewCustomer.show()
-
-        #filaSeleccionada = [dato.text() for dato in self.tableWidget.selectedItems()]
-        #print(filaSeleccionada)
-        #QMessageBox.warning(self, "Probando", filaSeleccionada + ", celda seleccionada {}.   ".format(celda.text()), QMessageBox.Ok)
 
 class ViewCustomer(QWidget):
     def __init__(self, customer):
         super().__init__()
+    #def __init__(self, *args, **kwargs):
+    #    super(QWidget, self).__init__(*args, **kwargs)
         self.setFixedSize(700, 500)
         self.customer = customer
-        #print(self.customer)
         self.setWindowTitle("Customer")
+        self.smtp = smtplib
+
+        #--# Back button
+        self.backbutton = QPushButton("Volver Atrás")
+        self.backbutton.setStyleSheet("background-color:#CDCDCD;");
         
         #--#
         self.mainLayout = QVBoxLayout()
@@ -376,6 +391,7 @@ class ViewCustomer(QWidget):
 
         #--# Unite all
 
+        self.mainLayout.addWidget(self.backbutton)
         self.mainLayout.addLayout(self.layoutV)
         self.mainLayout.addWidget(self.groupBoxFechaC)
         self.setLayout(self.mainLayout)
@@ -385,18 +401,18 @@ class ViewCustomer(QWidget):
 
         self.edit.clicked.connect(self.editCustomer)
         self.sendEmail.clicked.connect(self.emailSend)
+        self.backbutton.clicked.connect(self.back)
 
     def editCustomer(self):
         self.hide()
         self.editC = EditCustomer(self.customer)   
         self.editC.show()
     
-    def emailSend(self):
-        
+    def emailSend(self):       
         def simpleSend(recver,subject,messag):
             defaultSend="igmavamailtest@gmail.com"
             defaultPass="ismabaya"
-            sendMail(defaultSend,defaultPass,recver,subject,messag)
+            return sendMail(defaultSend,defaultPass,recver,subject,messag)
 
         def sendMail(sender,sendpass,recver,subject,messag):
             message = MIMEMultipart()
@@ -405,18 +421,20 @@ class ViewCustomer(QWidget):
             message['Subject'] = subject
             message.attach(MIMEText(messag, 'plain'))
             text = message.as_string()
-            try:
+            """try:
+                print("1")
                 session = smtplib.SMTP('smtp.gmail.com', 587)
+                print("2")
                 session.starttls()
+                print("3")
                 session.login(sender, sendpass)
                 session.sendmail(sender, recver, text)
                 session.quit()
-                self.movie.stop()
-                QMessageBox.warning(self, "", "¡ Correo enviado !", QMessageBox.Ok)
+                return "Correo Enviado"
             except:
-                self.movie.stop()
-                QMessageBox.warning(self, "", "¡ Ocurrio un error !",QMessageBox.Ok)
-           
+                return "Ocurrio Error"""
+            QMessageBox.information(self,"", "Hay que arreglo lo del envio", QMessageBox.Ok)
+    
         def moroseMail(name,debt,mail):
             asunto="Importante: Comunicado sobre deuda Cabañas Igmava."
             cuerpo="""Estimado/a Sr./Sra. {},
@@ -427,10 +445,16 @@ class ViewCustomer(QWidget):
     
             Cuenta: XXXX-XXXX-XXXX
             Fono: XXXX-XXXX-XXXX""".format(name,debt)
-            simpleSend(mail,asunto,cuerpo)
+            return simpleSend(mail,asunto,cuerpo)
     
-        self.movie.start()
-        moroseMail("Abada Kadabra",50000,"igmavamailtest@gmail.com")
+    
+        result = moroseMail("Abada Kadabra",50000,"igmavamailtest@gmail.com")
+        print(result)
+
+    def back(self):
+        self.manager = Manager()
+        self.hide()
+        self.manager.show()
     
 
 class EditCustomer(QWidget):
@@ -515,6 +539,10 @@ class EditCustomer(QWidget):
         contacto = self.contacto.text()
         customer = {'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
         r = requests.put('http://127.0.0.1:8007/clientes/{}'.format(rut), json = customer)
+
+        #FALTA VERIFICAR EL 'r' ( 200 = OK, 404 = ERROR)
+        
+        QMessageBox.information(self,"", "Usuario actualizado!", QMessageBox.Ok)
         #print(r)
         #if(r == "<Response [200]>"):
         self.customer[0] = contacto 
@@ -525,6 +553,8 @@ class EditCustomer(QWidget):
             
         self.hide()
         self.viewCustomer = ViewCustomer(self.customer)
+        #self.tabs = TabWidget()
+        #self.tabs.update()
         self.viewCustomer.show()
          
 class ThirdTab(QWidget):
@@ -545,7 +575,7 @@ class ThirdTab(QWidget):
 
 
 app = QApplication(sys.argv)
-app.setStyleSheet(qdarkstyle.load_stylesheet())
-tabwidget = TabWidget()
-tabwidget.show()
+#app.setStyleSheet(qdarkstyle.load_stylesheet())
+manager = Manager()
+manager.show()
 app.exec()
