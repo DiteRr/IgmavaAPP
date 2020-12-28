@@ -541,7 +541,7 @@ font-weight:bold;</string>
   </layout>
  </widget>
  <resources>
-  <include location="../../imageUse/user.qrc"/>
+  <include location="../../../test.qrc"/>
  </resources>
  <connections/>
 </ui>

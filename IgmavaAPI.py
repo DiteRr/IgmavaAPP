@@ -42,7 +42,6 @@ class Clientes_rut(Resource):
 
     def put(self, rut):
         data = request.json
-        print(data)
         conn = db_connect.connect()
         query = conn.execute("update Cliente set nombre='{}', procedencia='{}', telefono={}, correo='{}', contacto='{}' where RUT='{}'".format(
                              data['nombre'],
@@ -76,6 +75,51 @@ class Cabins_id(Resource):
                              int(_id)))
         return 0
 
+class Observaciones_id(Resource):
+    def get(self, _id): # cab id
+        conn = db_connect.connect()
+        query = conn.execute("select * from ObsCab where Cabin=%d " %int(_id))
+        result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
+        return jsonify(result)
+
+    def delete(self, _id):
+        conn = db_connect.connect()
+        query = conn.execute("delete from ObsCab where ID=%d" %int(_id))
+        return 0
+
+    def put(self, _id): # ons id
+        data = request.json
+        conn = db_connect.connect()
+        query = conn.execute("update ObsCab set Cabin={}, Tipo='{}', Fecha='{}', Descripcion='{}', Arreglado={}  where ID={}".format(
+                             data['cabin'],
+                             data['tipo'],
+                             data['fecha'],
+                             data['descripcion'],
+                             data['arreglado'],
+                             int(_id)))
+
+class Observaciones_no_arreglado(Resource):
+    def get(self, _id): # cab id
+        conn = db_connect.connect()
+        query = conn.execute("select * from ObsCab where Cabin=%d and Arreglado=0" %int(_id))
+        result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
+        return jsonify(result)
+
+
+class Observaciones(Resource):
+    def post(self):
+        id_ = random.randint(0,1000000000) # Hay un problema en mysql y no funcionan indices con autoincremento
+        data = request.json
+        conn = db_connect.connect()
+        query = conn.execute("insert into ObsCab values ({}, {}, '{}', '{}', '{}', {})".format(
+                             id_,
+                             data['cabin'],
+                             data['tipo'],
+                             data['fecha'],
+                             data['descripcion'],
+                             data['arreglado']))
+        return 0
+
 class Reservas(Resource):
     def get(self):
         conn = db_connect.connect() # connect to database
@@ -87,7 +131,7 @@ class Reservas(Resource):
         id_ = random.randint(0,1000000000) # Hay un problema en mysql y no funcionan indices con autoincremento
         data = request.json
         conn = db_connect.connect()
-        query = conn.execute("insert into Reservas values ({}, '{}', '{}', '{}', {}, {})".format(
+        query = conn.execute("insert into Reserva values ({}, '{}', '{}', '{}', {}, {})".format(
                              id_,
                              data['RUT'],
                              data['in'],
@@ -104,28 +148,30 @@ class Reservas_id(Resource):
         conn = db_connect.connect()
         query = conn.execute("select * from Reserva where ID=%d" %int(_id))
         result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
+        query = conn.execute("select IDcabin from CabsRes where IDreserva=%d" %int(_id))
+        result['data'][0]['Cabins'] = [i[0] for i in query.cursor]
         return jsonify(result)
 
     def delete(self, _id):
         conn = db_connect.connect()
+        query = conn.execute("delete from CabsRes where IDreserva=%d" %int(_id))
         query = conn.execute("delete from Reserva where ID=%d" %int(_id))
-        query = conn.execute("delete from CabsRes where ID=%d" %int(_id))
         return 0
 
     def put(self, _id):
         data = request.json
         conn = db_connect.connect()
-        query = conn.execute("update Reservas set rut='{}', check_in='{}', check_out='{}', costo={}, pagado={} where id={}".format(
+        query = conn.execute("update Reserva set rut='{}', check_in='{}', check_out='{}', costo={}, pagado={} where id={}".format(
                              data['RUT'],
                              data['in'],
                              data['out'],
                              int(data['costo']),
                              int(data['pagado']),
                              int(_id)))
-        query = conn.execute("delete from CabsRes where ID=%d" %int(_id))
+        query = conn.execute("delete from CabsRes where IDreserva=%d" %int(_id))
         for cab in data['cabins']:
             query = conn.execute("insert into CabsRes values ({}, {})".format(
-                             id_, cab))
+                             _id, cab))
         return 0
 
 class Reservas_date(Resource):
@@ -143,15 +189,27 @@ class Reservas_nopagadas(Resource):
         result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
         return jsonify(result)
 
+class Disponible(Resource):
+    def get(self, a, b):
+        conn = db_connect.connect()
+	# select ID from Cabin where ID not in (select IDcabin from CabsRes)
+        query = conn.execute("select ID from Cabin where Id not in (select IDcabin from CabsRes left join Reserva on CabsRes.IDreserva = Reserva.Id where Check_out > '{}' and Check_in < '{}')".format(a,b))
+        result = {'data': [{'Cabins': [i[0] for i in query.cursor]}]}
+        return jsonify(result)
+
 
 api.add_resource(Clientes, '/clientes')
 api.add_resource(Clientes_rut, '/clientes/<rut>') 
 api.add_resource(Cabins, '/cabanas')
 api.add_resource(Cabins_id, '/cabanas/<_id>') 
+api.add_resource(Observaciones, '/observaciones/') 
+api.add_resource(Observaciones_no_arreglado, '/noarreglado/<_id>') 
+api.add_resource(Observaciones_id, '/observaciones/<_id>') 
 api.add_resource(Reservas, '/reservas')
 api.add_resource(Reservas_id, '/reservas/<_id>') 
 api.add_resource(Reservas_date, '/fecha/<date>') 
 api.add_resource(Reservas_nopagadas, '/nopagado') 
+api.add_resource(Disponible, '/disponible/<a>/<b>') 
 
 
 if __name__ == '__main__':

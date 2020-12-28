@@ -42,6 +42,7 @@ CREATE TABLE ObsCab(
 	Tipo VARCHAR(20) NOT NULL,
 	Fecha DATE NOT NULL,
 	Descripcion VARCHAR(500),
+	Arreglado BOOLEAN,
 	FOREIGN KEY(Cabin) REFERENCES Cabin(ID)
 );
 
@@ -72,4 +73,5 @@ VALUES
 
 INSERT INTO ObsCab
 VALUES
-(1, 1, 'Electrico', '2021-01-01', 'Un problema electrico');
+(1, 1, 'Electrico', '2020-01-01', 'Un problema electrico', 1),
+(2, 1, 'Electrico', '2021-01-01', 'Otro problema electrico', 0);

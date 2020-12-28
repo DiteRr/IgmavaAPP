@@ -30,6 +30,12 @@ form_addR, base_addR = uic.loadUiType(uifile_4)
 uifile_5 = 'UIfiles/newUser.ui'
 form_newUser, base_newUser = uic.loadUiType(uifile_5)
 
+uifile_6 = 'UIfiles/cabinsAvailables.ui'
+form_available, base_available = uic.loadUiType(uifile_6)
+
+uifile_7 = 'UIfiles/AceptarReserva.ui'
+form_reserva, base_reserva = uic.loadUiType(uifile_7)
+
 
 session = smtplib.SMTP('smtp.gmail.com', 587) #Me funciona declarandolo acá!
 
@@ -329,10 +335,131 @@ class Agregar_reserva(base_addR, form_addR):
     def __init__(self, customer):
         super(base_addR, self).__init__()
         self.setupUi(self)
+        self.rut = customer['RUT']
         #print(customer['Nombre'])
         self.username.setText(customer['Nombre'])
         self.rut_user.setText(customer['RUT'])
 
+        #== EVENTOS ==#
+
+        self.precio.clicked.connect(self.disponibilidad)
+        
+    
+    def disponibilidad(self):
+     
+        #Verificar si hay reserva 
+
+        desc = self.desc.value()
+        dateCheckin = self.checkin.date().toString(Qt.ISODate)
+        dateCheckout = self.checkout.date().toString(Qt.ISODate)
+        r = requests.get("http://127.0.0.1:8007/disponible/{}/{}".format(dateCheckin,dateCheckout))
+        result = r.json()['data'][0]['Cabins']
+
+        self.cabinsAvailable = Cabañas_disponibles(self.rut, result, desc, dateCheckin, dateCheckout)
+        self.cabinsAvailable.show()
+
+
+
+class Cabañas_disponibles(base_available, form_available):
+    def __init__(self, rut, cabins, desc, dateCheckin, dateCheckout):
+        super(base_available, self).__init__()
+        self.setupUi(self)
+        
+        self.rut = rut
+        self.desc = desc
+        self.cabins = cabins
+        self.dateCheckin = dateCheckin
+        self.dateCheckout = dateCheckout
+        
+        if 1 not in self.cabins:
+            self.cab1.hide()
+        
+        if 2 not in self.cabins:
+            self.cab2.hide()
+
+        if 3 not in self.cabins:
+            self.cab3.hide()
+        
+        if(cabins == []):
+            self.label.setText("NO HAY DISPONIBILIDAD")
+            self.precio.hide()
+
+
+    
+        # == EVENTOS == #
+
+        self.precio.clicked.connect(self.aceptarR)
+        self.cancelar.clicked.connect(self.cancel)
+
+
+    def aceptarR(self):
+
+        #--#
+        self.cabs = []
+        if self.cab1.isChecked() == True:
+            self.cabs.append(1)
+            
+        if self.cab2.isChecked() == True:
+            self.cabs.append(2)
+            
+        if self.cab3.isChecked() == True:
+            self.cabs.append(3)              
+        
+        self.aceptarReserva = Aceptar_reserva(self.rut, self.cabs, self.desc, self.dateCheckin, self.dateCheckout)
+        self.close()
+        self.aceptarReserva.show()
+    
+    def cancel(self):
+        self.close()
+
+        
+
+class Aceptar_reserva(base_reserva, form_reserva):
+    def __init__(self, rut, cabs, desc, dateCheckin, dateCheckout):
+        super(base_reserva, self).__init__()
+        self.setupUi(self)
+
+        self.rut = rut
+        self.desc = desc
+        self.cabs = cabs
+        self.desc = desc
+        self.dateCheckin = dateCheckin
+        self.dateCheckout = dateCheckout
+
+
+        self.totalCosto = 0
+        for cab in cabs:
+            #Me falta considerar los dias
+            r = requests.get('http://127.0.0.1:8007//cabanas/{}'.format(cab))
+            cabana = r.json()['data'][0]
+            costo = cabana['Precio'] - cabana['Precio']*(desc/100)
+            print(costo)
+            self.totalCosto = self.totalCosto + costo
+
+        print(self.totalCosto)
+        self.precio.setText(str(self.totalCosto))
+
+        
+        # == EVENTOS == #
+
+        self.aceptar.clicked.connect(self.aceptarReserva)
+        self.cancelar.clicked.connect(self.cancel)
+
+
+    def aceptarReserva(self):
+        data = {'RUT': self.rut, 'in': self.dateCheckin, 'out': self.dateCheckout, 'costo': str(self.totalCosto) , 'pagado': '0', 'cabins': self.cabs}
+
+        print(data)
+
+        r = requests.post('http://127.0.0.1:8007//reservas', json = data)
+        QMessageBox.information(self,"", "Reserva ingresada", QMessageBox.Ok)
+        self.close()
+    
+    def cancel(self):
+        self.close()
+
+        
+     
 
 class Nuevo_usuario(base_newUser,form_newUser):
 
