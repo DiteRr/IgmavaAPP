@@ -434,7 +434,7 @@ class Aceptar_reserva(base_reserva, form_reserva):
             cabana = r.json()['data'][0]
             costo = cabana['Precio'] - cabana['Precio']*(desc/100)
             print(costo)
-            self.totalCosto = self.totalCosto + costo
+            self.totalCosto = int(self.totalCosto + costo) 
 
         print(self.totalCosto)
         self.precio.setText(str(self.totalCosto))
@@ -447,11 +447,12 @@ class Aceptar_reserva(base_reserva, form_reserva):
 
 
     def aceptarReserva(self):
-        data = {'RUT': self.rut, 'in': self.dateCheckin, 'out': self.dateCheckout, 'costo': str(self.totalCosto) , 'pagado': '0', 'cabins': self.cabs}
+        data = {'RUT': self.rut, 'in': self.dateCheckin, 'out': self.dateCheckout, 'costo': self.totalCosto , 'pagado': '0', 'cabins': self.cabs}
 
         print(data)
 
         r = requests.post('http://127.0.0.1:8007//reservas', json = data)
+        print(r)
         QMessageBox.information(self,"", "Reserva ingresada", QMessageBox.Ok)
         self.close()
     

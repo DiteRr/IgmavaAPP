@@ -89,6 +89,9 @@ QTabBar::tab::selected {
               <string notr="true">background-color : #CDCDCD;
 color: rgb(0,0,0);</string>
              </property>
+             <property name="verticalHeaderFormat">
+              <enum>QCalendarWidget::NoVerticalHeader</enum>
+             </property>
             </widget>
            </item>
           </layout>
@@ -241,7 +244,7 @@ color: #FFFFFF;</string>
            <item>
             <widget class="QLabel" name="label_2">
              <property name="styleSheet">
-              <string notr="true">image:url(:/prefijoNuevo/user.png)</string>
+              <string notr="true">image: url(:/prefijoNuevo/imageUse/user.png);</string>
              </property>
              <property name="text">
               <string/>
@@ -375,6 +378,19 @@ font-weight:bold;</string>
                 <string>1231231231</string>
                </property>
               </widget>
+             </item>
+             <item row="2" column="3">
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </item>
