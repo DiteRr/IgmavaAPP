@@ -174,12 +174,29 @@ class Reservas_id(Resource):
                              _id, cab))
         return 0
 
+class Reservas_rut(Resource):
+    def get(self, _rut):
+        conn = db_connect.connect()
+        query = conn.execute("select * from Reserva where RUT='{}'".format(_rut))
+        result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
+        print(result)
+        return jsonify(result)
+
 class Reservas_date(Resource):
     def get(self, date):
         conn = db_connect.connect()
         query = conn.execute("select * from Reserva where check_out >= '%s'" %date)
         result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
         return jsonify(result)
+
+
+class Reservas_ocupadas(Resource):
+    def get(self, date):
+        conn = db_connect.connect()
+        query = conn.execute("select IDcabin, Nombre, Cliente.RUT, Procedencia, Telefono, Correo, Contacto from CabsRes left join Reserva on CabsRes.IDreserva = Reserva.Id left join Cliente on Reserva.RUT = Cliente.RUT where Check_out >= '{}' and Check_in <= '{}'".format(date, date))
+        result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
+        return jsonify(result)
+
 
 
 class Reservas_nopagadas(Resource):
@@ -193,7 +210,7 @@ class Disponible(Resource):
     def get(self, a, b):
         conn = db_connect.connect()
 	# select ID from Cabin where ID not in (select IDcabin from CabsRes)
-        query = conn.execute("select ID from Cabin where Id not in (select IDcabin from CabsRes left join Reserva on CabsRes.IDreserva = Reserva.Id where Check_out > '{}' and Check_in < '{}')".format(a,b))
+        query = conn.execute("select ID from Cabin where Id not in (select IDcabin from CabsRes left join Reserva on CabsRes.IDreserva = Reserva.Id where Check_out >= '{}' and Check_in <= '{}')".format(a,b))
         result = {'data': [{'Cabins': [i[0] for i in query.cursor]}]}
         return jsonify(result)
 
@@ -206,10 +223,12 @@ api.add_resource(Observaciones, '/observaciones/')
 api.add_resource(Observaciones_no_arreglado, '/noarreglado/<_id>') 
 api.add_resource(Observaciones_id, '/observaciones/<_id>') 
 api.add_resource(Reservas, '/reservas')
-api.add_resource(Reservas_id, '/reservas/<_id>') 
+api.add_resource(Reservas_id, '/reservas/<_id>')
+api.add_resource(Reservas_rut, '/reservasRut/<_rut>')
 api.add_resource(Reservas_date, '/fecha/<date>') 
 api.add_resource(Reservas_nopagadas, '/nopagado') 
 api.add_resource(Disponible, '/disponible/<a>/<b>') 
+api.add_resource(Reservas_ocupadas, '/ocupado/<date>')
 
 
 if __name__ == '__main__':
