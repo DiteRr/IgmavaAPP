@@ -1,7 +1,7 @@
 #import requests
 import json
 import requests
-import sys
+import sys, re
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -1054,32 +1054,125 @@ class Nuevo_usuario(base_newUser,form_newUser):
         super(base_newUser, self).__init__()
         self.setupUi(self)
 
+        self.rut.textChanged.connect(self.validar_rut)
+        self.nombre.textChanged.connect(self.validar_nombre)
+        self.correo.textChanged.connect(self.validar_email)
+        self.telefono.textChanged.connect(self.validar_telefono)
+        self.procedencia.textChanged.connect(self.validar_procedencia)
+        self.contacto.textChanged.connect(self.validar_contacto)
+
+
         self.aceptar.clicked.connect(self.confirmed)
+
     
     def confirmed(self):
-        rut = self.rut.text()
-        nombre = self.nombre.text()
-        procedencia = self.procedencia.text()
-        telefono = self.telefono.text()
-        correo = self.correo.text()
-        contacto = self.contacto.text()
-        customer = {'RUT': rut, 'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
-        r = requests.post('http://127.0.0.1:8007/clientes', json = customer)
+        if self.validar_rut() and self.validar_nombre() and self.validar_email() and self.validar_telefono() and self.validar_procedencia and self.validar_contacto:
+            rut = self.rut.text()
+            nombre = self.nombre.text()
+            procedencia = self.procedencia.text()
+            telefono = self.telefono.text()
+            correo = self.correo.text()
+            contacto = self.contacto.text()
+            customer = {'RUT': rut, 'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
+            r = requests.post('http://127.0.0.1:8007/clientes', json = customer)
         
-        customer = {'RUT': rut, 'Nombre': nombre, 'Procedencia': procedencia, 'Telefono': telefono, 'Correo': correo, 'Contacto': contacto}
-        #FALTA VERIFICAR EL 'r' ( 200 = OK, 404 = ERROR)
-        print(r)
-        self.submitted2.emit(rut, nombre, telefono, correo, procedencia, contacto)
-        self.addReserve = Agregar_reserva(customer)
-        self.close()
-        self.addReserve.show()
-        #print(r)
+            customer = {'RUT': rut, 'Nombre': nombre, 'Procedencia': procedencia, 'Telefono': telefono, 'Correo': correo, 'Contacto': contacto}
+            #FALTA VERIFICAR EL 'r' ( 200 = OK, 404 = ERROR)
+            print(r)
+            self.submitted2.emit(rut, nombre, telefono, correo, procedencia, contacto)
+            self.addReserve = Agregar_reserva(customer)
+            QMessageBox.information(self, "Formulario correcto", "Usuario ingresado en el sistema", QMessageBox.Discard)
+            self.close()
+            self.addReserve.show()
+        else:          
+            QMessageBox.warning(self, "Formulario incorrecto", "Validación incorrecta", QMessageBox.Discard)
+ 
+        
+        #print(r)"""
         #if(r == "<Response [200]>"):
 
         #customer = [rut, nombre, procedencia, telefono, correo, contacto]
 
         #self.submitted.emit(rut, nombre, telefono, correo, procedencia, contacto)
         #self.close()
+    def validar_rut(self):
+        rut = self.rut.text()
+        validar = re.match (('^[0-9a-zA-Z]+$')  , rut, re.I)
+        if rut == "":
+            self.rut.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.rut.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.rut.setStyleSheet("border: 1px solid green;")
+            return True
+
+    def validar_telefono(self):
+        telefono = self.telefono.text()
+        validar = re.match (('^[ 0-9]+$')  , telefono)
+        if telefono == "":
+            self.rut.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.telefono.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.telefono.setStyleSheet("border: 1px solid green;")
+            return True
+
+    def validar_nombre(self):
+        nombre = self.nombre.text()
+        validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', nombre, re.I)
+        if nombre == "":
+            self.nombre.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.nombre.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.nombre.setStyleSheet("border: 1px solid green;")
+            return True
+    
+    def validar_procedencia(self):
+        procedencia = self.procedencia.text()
+        validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', procedencia, re.I)
+        if procedencia == "":
+            self.procedenvalidar_rutcia.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.procedencia.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.procedencia.setStyleSheet("border: 1px solid green;")
+            return True
+    
+    def validar_email(self):
+        email = self.correo.text()
+        validar = re.match('^[a-zA-Z0-9\._-]+@[a-zA-Z0-9-]{2,}[.][a-zA-Z]{2,4}$', email, re.I)
+        if email == "":
+            self.correo.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.correo.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.correo.setStyleSheet("border: 1px solid green;")
+            return True
+    
+    def validar_contacto(self):
+        contacto = self.contacto.text()
+        validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', contacto, re.I)
+        if contacto == "":
+            self.contacto.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.contacto.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.contacto.setStyleSheet("border: 1px solid green;")
+            return True
+    
 
     
     

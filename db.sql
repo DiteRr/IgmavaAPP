@@ -6,16 +6,16 @@ USE igmava;
 
 CREATE TABLE Cliente(
 	RUT VARCHAR(20) NOT NULL PRIMARY KEY,
-	Nombre VARCHAR(20) NOT NULL,
-	Procedencia VARCHAR(20),
+	Nombre VARCHAR(50) NOT NULL,
+	Procedencia VARCHAR(50),
 	Telefono INT,
-	Correo VARCHAR(20),
+	Correo VARCHAR(50),
 	Contacto VARCHAR(20)
 );
 
 CREATE TABLE Reserva(
 	ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	RUT VARCHAR(20) NOT NULL,
+	RUT VARCHAR(50) NOT NULL,
 	Check_in DATE NOT NULL,
 	Check_out DATE NOT NUll,
 	Costo INT NOT NULL,
@@ -50,13 +50,14 @@ INSERT INTO Cliente
 VALUES
 ('18345984-3', 'Juan Perez', 'Santiago', 92384857, 'asd@gmai.com', 'directo'),
 ('13948237-4', 'Maria Gonzales', 'Copiapo', 84472647, 'example@hotmail.com', 'Airbnb'),
-('9345872-k', 'Alberto Medina', 'La Serena', 83647183, 'ejemplo@uach.cl', 'diredcto');
+('9345872-k', 'Alberto Medina', 'La Serena', 83647183, 'ejemplo@uach.cl', 'diredcto'),
+('00000000-0', '0', '0', 0, '0', '0');
 
 INSERT INTO Cabin
 VALUES
-(1, 30),
-(2, 80),
-(3, 25);
+(1, 50),
+(2, 50),
+(3, 50);
 
 INSERT INTO Reserva
 VALUES
