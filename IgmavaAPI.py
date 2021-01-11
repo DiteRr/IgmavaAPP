@@ -26,7 +26,7 @@ class Clientes(Resource):
                              int(data['telefono']),
                              data['correo'],
                              data['contacto']))
-        return 0
+        return jsonify({'message': '0'})
 
 class Clientes_rut(Resource):
     def get(self, rut):
@@ -38,7 +38,7 @@ class Clientes_rut(Resource):
     def delete(self, rut):
         conn = db_connect.connect()
         query = conn.execute("delete from Cliente where RUT='%s'" %rut)
-        return 0
+        return jsonify({'message': '0'})
 
     def put(self, rut):
         data = request.json
@@ -74,6 +74,14 @@ class Cabins_id(Resource):
                              data['observaciones'],
                              int(_id)))
         return 0
+class Cabins_precio(Resource):
+    def put(self):
+        data = request.json
+        conn = db_connect.connect()
+        for ids in [1,2,3]:
+            query = conn.execute("update Cabin set Precio={} where ID={}".format(int(data['precio']), ids))
+        return 0
+
 
 class Observaciones_id(Resource):
     def get(self, _id): # cab id
@@ -229,6 +237,7 @@ api.add_resource(Reservas_date, '/fecha/<date>')
 api.add_resource(Reservas_nopagadas, '/nopagado') 
 api.add_resource(Disponible, '/disponible/<a>/<b>') 
 api.add_resource(Reservas_ocupadas, '/ocupado/<date>')
+api.add_resource(Cabins_precio, '/cabanas/precio')
 
 
 if __name__ == '__main__':

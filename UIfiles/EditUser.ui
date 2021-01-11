@@ -17,7 +17,7 @@
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(243, 243, 243);</string>
+   <string notr="true">background-color: rgb(255, 255, 255);</string>
   </property>
   <widget class="QGroupBox" name="groupBox_4">
    <property name="geometry">
@@ -344,6 +344,15 @@ font-weight: bold;</string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>nombre</tabstop>
+  <tabstop>procedencia</tabstop>
+  <tabstop>telefono</tabstop>
+  <tabstop>correo</tabstop>
+  <tabstop>contacto</tabstop>
+  <tabstop>aceptar</tabstop>
+  <tabstop>cancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -221,6 +221,14 @@ font-weight:bold;</string>
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>checkin</tabstop>
+  <tabstop>checkout</tabstop>
+  <tabstop>tipo</tabstop>
+  <tabstop>descripcion</tabstop>
+  <tabstop>aceptar</tabstop>
+  <tabstop>cancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

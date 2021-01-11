@@ -396,6 +396,16 @@ font-weight:bold;</string>
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>rut</tabstop>
+  <tabstop>nombre</tabstop>
+  <tabstop>procedencia</tabstop>
+  <tabstop>telefono</tabstop>
+  <tabstop>correo</tabstop>
+  <tabstop>contacto</tabstop>
+  <tabstop>aceptar</tabstop>
+  <tabstop>cancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

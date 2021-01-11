@@ -91,6 +91,11 @@ color: #FFFFFF;</string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>rut_edit</tabstop>
+  <tabstop>reservar_rut</tabstop>
+  <tabstop>nuevo_usuario</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

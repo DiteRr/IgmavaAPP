@@ -61,6 +61,9 @@ form_o, base_o = uic.loadUiType(uifile_14)
 uifile_15 = 'UIfiles/fixedUp.ui'
 form_arr, base_arr = uic.loadUiType(uifile_15)
 
+uifile_16 = 'UIfiles/editPrecio.ui'
+form_edp, base_edp = uic.loadUiType(uifile_16)
+
 
 session = smtplib.SMTP('smtp.gmail.com', 587) #Me funciona declarandolo acá!
 
@@ -146,8 +149,9 @@ class Tabs(base_1, form_1):
         
         self.deployCabins()
         self.tableWidgetCab.itemDoubleClicked.connect(self.doubleClickCab)
+        self.edp.clicked.connect(self.editP)
 
-
+    @qtc.pyqtSlot()
     def deployCabins(self):
         
         r = requests.get("http://127.0.0.1:8007/cabanas")
@@ -313,9 +317,15 @@ class Tabs(base_1, form_1):
     def remove(self):
         rut = self.rut.text()
         print(rut)
-        r = requests.delete('http://127.0.0.1:8007/clientes/{}'.format(rut))
-        print(r)
-        self.deployCustomers()
+        ret = QMessageBox.warning(self,"Warning", "¿Está seguro que desea eliminar el cliente?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            r = requests.delete('http://127.0.0.1:8007/clientes/{}'.format(rut))
+            r2= r.json()
+            if(r2['message'] == 'Internal Server Error'):
+                QMessageBox.warning(self,"Warning", "No se pudo eliminar, debido a que posee reservas disponibles. Para poder removerlo necesita eliminar todo su historial de reservas.", QMessageBox.Ok)
+            else:
+                QMessageBox.information(self,"Information", "El cliente se eliminó satisfactoriamente", QMessageBox.Ok)
+                self.deployCustomers()
     
     def emailSend(self):
         def simpleSend(recver,subject,messag):
@@ -379,6 +389,12 @@ class Tabs(base_1, form_1):
                 self.tableWidget.setItem(0, 5, QTableWidgetItem(str(customer['Telefono'])))
             except:
                 print("Rut inexistente")
+    
+    def editP(self):
+        self.editPrecio = Editar_Precio()
+        self.editPrecio.submitted.connect(self.deployCabins)
+        self.editPrecio.show()
+
 
 class Observacion_Cabana(base_obs, form_obs):
     def __init__(self, cab):
@@ -468,51 +484,114 @@ class Anadir_Observacion_Cabana(base_o, form_o):
         self.setupUi(self)
         self.cab_id = id_cab
 
+        self.tipo.textChanged.connect(self.validar_tipo)
+        self.descripcion.textChanged.connect(self.validar_descripcion)
+
         self.aceptar.clicked.connect(self.accept)
     
     def accept(self):
-        now = QDate.currentDate()
-        date = now.toString(Qt.ISODate)
-        tipo = self.tipo.text()
+        if self.validar_descripcion() and self.validar_tipo():
+            now = QDate.currentDate()
+            date = now.toString(Qt.ISODate)   
+            tipo = self.tipo.text()
+            descripcion = self.descripcion.toPlainText()
+            obsCab = {'cabin': self.cab_id, 'tipo': tipo, 'fecha': date, 'descripcion': descripcion, 'arreglado': '0'}
+            r = requests.post('http://127.0.0.1:8007/observaciones/', json = obsCab)
+            self.submitted.emit()
+            self.close()
+            QMessageBox.information(self, "Formulario correcto", "Observacion agregada a la cabaña", QMessageBox.Ok)
+        else:
+            QMessageBox.warning(self, "Formulario incorrecto", "Verifique si los datos estan ingresados correctamente", QMessageBox.Ok)
+
+    
+    def validar_descripcion(self):
         descripcion = self.descripcion.toPlainText()
-        print(date)
-        
-        obsCab = {'cabin': self.cab_id, 'tipo': tipo, 'fecha': date, 'descripcion': descripcion, 'arreglado': '0'}
-        r = requests.post('http://127.0.0.1:8007/observaciones/', json = obsCab)
-        self.submitted.emit()
-        print(r)
-        self.close()
+        validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', descripcion, re.I)
+        if descripcion == "":
+            self.descripcion.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.descripcion.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.descripcion.setStyleSheet("border: 1px solid green;")
+            return True
+    
+    def validar_tipo(self):
+        tipo = self.tipo.text()
+        validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', tipo, re.I)
+        if tipo == "":
+            self.tipo.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.tipo.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.tipo.setStyleSheet("border: 1px solid green;")
+            return True
 
 class Deshabilitar_Cabana(base_desh, form_desh):
 
-     submitted = qtc.pyqtSignal()
+    submitted = qtc.pyqtSignal()
 
-     def __init__(self, id_cab):
+    def __init__(self, id_cab):
         super(base_desh, self).__init__()
         self.cab_id = id_cab
         self.setupUi(self)
         self.aceptar.clicked.connect(self.aceptarDesh)
 
+        self.tipo.textChanged.connect(self.validar_tipo)
+        self.descripcion.textChanged.connect(self.validar_descripcion)
+
     
      
-     def aceptarDesh(self):
-         dateCheckin = self.checkin.date().toString(Qt.ISODate)
-         dateCheckout = self.checkout.date().toString(Qt.ISODate)
-         tipo = self.tipo.text()
-         descripcion = self.descripcion.toPlainText()
-
-         #Observacion cabaña, deshabilitada
-         obsCab = {'cabin': self.cab_id, 'tipo': tipo, 'fecha': dateCheckin, 'descripcion': descripcion, 'arreglado': '0'}
-         r = requests.post('http://127.0.0.1:8007/observaciones/', json = obsCab)
-         print(r)
-         self.submitted.emit()
+    def aceptarDesh(self):       
+        if self.validar_descripcion() and self.validar_tipo():
+            dateCheckin = self.checkin.date().toString(Qt.ISODate)
+            dateCheckout = self.checkout.date().toString(Qt.ISODate)
+            tipo = self.tipo.text()
+            descripcion = self.descripcion.toPlainText()
+            
+            #Observacion cabaña, deshabilitada
+            obsCab = {'cabin': self.cab_id, 'tipo': tipo, 'fecha': dateCheckin, 'descripcion': descripcion, 'arreglado': '0'}
+            r = requests.post('http://127.0.0.1:8007/observaciones/', json = obsCab)
+            #print(r)
+            self.submitted.emit()
     
-         #Deshabilitar cabaña
-         data = {'RUT': '00000000-0', 'in': dateCheckin, 'out': dateCheckout, 'costo': 0 , 'pagado': 0, 'cabins': [int(self.cab_id)]}
-         r2 = requests.post('http://127.0.0.1:8007//reservas', json = data)
-         print(r2)
+            #Deshabilitar cabaña
+            data = {'RUT': '00000000-0', 'in': dateCheckin, 'out': dateCheckout, 'costo': 0 , 'pagado': 0, 'cabins': [int(self.cab_id)]}
+            r2 = requests.post('http://127.0.0.1:8007//reservas', json = data)
+            #print(r2)
+            QMessageBox.information(self, "Formulario correcto", "Cabaña deshabilitada!", QMessageBox.Ok)
+            self.close()
+        else:
+            QMessageBox.warning(self, "Formulario incorrecto", "Verifique si los datos estan ingresados correctamente", QMessageBox.Ok)
 
-         self.close()
+    def validar_descripcion(self):
+        descripcion = self.descripcion.toPlainText()
+        validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', descripcion, re.I)
+        if descripcion == "":
+            self.descripcion.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.descripcion.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.descripcion.setStyleSheet("border: 1px solid green;")
+            return True
+    
+    def validar_tipo(self):
+        tipo = self.tipo.text()
+        validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', tipo, re.I)
+        if tipo == "":
+            self.tipo.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.tipo.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.tipo.setStyleSheet("border: 1px solid green;")
+            return True
 
 class Arreglado_Cabana(base_arr, form_arr):
     submitted = qtc.pyqtSignal()
@@ -540,7 +619,7 @@ class Reservas_Usuario(base_reservasUser, form_reservasUser):
     def __init__(self, rut):
         super(base_reservasUser, self).__init__()
         self.setupUi(self)
-        #print(rut)
+        self.r = rut #rut
 
 
         #-- Table customer --#
@@ -569,7 +648,7 @@ class Reservas_Usuario(base_reservasUser, form_reservasUser):
     def deployReservas(self, rut):
         r = requests.get('http://127.0.0.1:8007/reservasRut/{}'.format(rut))
         reservas = r.json()['data']
-        #print(reservas)
+        print(reservas)
 
         self.reservasRUT.setRowCount(0)
         for row_number, customer in enumerate(reservas):
@@ -680,10 +759,12 @@ class Reservas_Usuario(base_reservasUser, form_reservasUser):
     def remove(self):
         ids = self.id.text()
         print(ids)
-        r = requests.delete('http://127.0.0.1:8007/reservas/{}'.format(ids))
-        print(r)
-        self.deployReservas(self.rut)
-
+        ret = QMessageBox.warning(self,"Warning", "¿Está seguro que desea eliminar la reserva?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            r = requests.delete('http://127.0.0.1:8007/reservas/{}'.format(ids))
+            QMessageBox.information(self,"Information", "La reserva se eliminó satisfactoriamente!", QMessageBox.Ok)
+            self.deployReservas(self.r)
+    
 class Editar_Reserva(base_editReserva, form_editReserva):
     
     submitted = qtc.pyqtSignal(str,str,str,str,str,str)
@@ -729,8 +810,6 @@ class Editar_Reserva(base_editReserva, form_editReserva):
     @qtc.pyqtSlot(str,str,str,str,str,str)
     def move_data(self, ids, rut, datecheckout, datecheckin, costo, pagado):
         self.submitted.emit(ids, rut, datecheckout, datecheckin, costo, pagado)
-    
-    #self.submitted.emit(self.id, self.rut, dateCheckout, dateCheckin)
 
 class Disponibilidad_reserva_usuario(form_disp, base_disp):
 
@@ -852,27 +931,103 @@ class Editar_Usuario(base_editUser, form_editUser):
         self.procedencia.setText(customer[3])
         self.contacto.setText(customer[0])
 
+        self.nombre.textChanged.connect(self.validar_nombre)
+        self.correo.textChanged.connect(self.validar_email)
+        self.telefono.textChanged.connect(self.validar_telefono)
+        self.procedencia.textChanged.connect(self.validar_procedencia)
+        self.contacto.textChanged.connect(self.validar_contacto)
+
         #== EVENTOS ==#
 
         self.aceptar.clicked.connect(self.confirmed)
     
     def confirmed(self):
-        rut = self.rut
-        nombre = self.nombre.text()
-        procedencia = self.procedencia.text()
-        telefono = self.telefono.text()
-        correo = self.correo.text()
-        contacto = self.contacto.text()
-        customer = {'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
-        r = requests.put('http://127.0.0.1:8007/clientes/{}'.format(rut), json = customer)
-        #FALTA VERIFICAR EL 'r' ( 200 = OK, 404 = ERROR)
-        
-        #print(r)
-        #if(r == "<Response [200]>"):
-        customer = {'RUT': rut, 'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
-        self.submitted.emit(rut, nombre, telefono, correo, procedencia, contacto)
-        self.close()
+        if self.validar_nombre() and self.validar_email() and self.validar_telefono() and self.validar_procedencia() and self.validar_contacto():
+            rut = self.rut
+            nombre = self.nombre.text()
+            procedencia = self.procedencia.text()
+            telefono = self.telefono.text()
+            correo = self.correo.text()
+            contacto = self.contacto.text()
+            customer = {'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
+            r = requests.put('http://127.0.0.1:8007/clientes/{}'.format(rut), json = customer)
+            #FALTA VERIFICAR EL 'r' ( 200 = OK, 404 = ERROR)
+            QMessageBox.information(self, "Formulario correcto", "Usuario actualizado", QMessageBox.Discard)
+            #print(r)
+            #if(r == "<Response [200]>"):
+            self.submitted.emit(rut, nombre, telefono, correo, procedencia, contacto)
+            self.close()
+           
+        else:          
+            QMessageBox.warning(self, "Formulario incorrecto", "Validación incorrecta", QMessageBox.Discard)
+ 
     
+    #==VALIDACIONES==#
+    def validar_telefono(self):
+        telefono = self.telefono.text()
+        validar = re.match (('^[0-9]+$')  , telefono)
+        if telefono == "":
+            self.rut.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.telefono.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.telefono.setStyleSheet("border: 1px solid green;")
+            return True
+
+    def validar_nombre(self):
+        nombre = self.nombre.text()
+        validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', nombre, re.I)
+        if nombre == "":
+            self.nombre.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.nombre.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.nombre.setStyleSheet("border: 1px solid green;")
+            return True
+    
+    def validar_procedencia(self):
+        procedencia = self.procedencia.text()
+        validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', procedencia, re.I)
+        if procedencia == "":
+            self.procedencia_rutcia.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.procedencia.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.procedencia.setStyleSheet("border: 1px solid green;")
+            return True
+    
+    def validar_email(self):
+        email = self.correo.text()
+        validar = re.match('^[a-zA-Z0-9\._-]+@[a-zA-Z0-9-]{2,}[.][a-zA-Z]{2,4}$', email, re.I)
+        if email == "":
+            self.correo.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.correo.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.correo.setStyleSheet("border: 1px solid green;")
+            return True
+    
+    def validar_contacto(self):
+        contacto = self.contacto.text()
+        validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', contacto, re.I)
+        if contacto == "":
+            self.contacto.setStyleSheet("border: 1px solid yellow;")
+            return False
+        elif not validar:
+            self.contacto.setStyleSheet("border: 1px solid red;")
+            return False
+        else:
+            self.contacto.setStyleSheet("border: 1px solid green;")
+            return True
+
 class Reservas_rut(base_2, form_2):
 
     submitted = qtc.pyqtSignal(str,str,str,str,str,str)
@@ -1066,7 +1221,7 @@ class Nuevo_usuario(base_newUser,form_newUser):
 
     
     def confirmed(self):
-        if self.validar_rut() and self.validar_nombre() and self.validar_email() and self.validar_telefono() and self.validar_procedencia and self.validar_contacto:
+        if self.validar_rut() and self.validar_nombre() and self.validar_email() and self.validar_telefono() and self.validar_procedencia() and self.validar_contacto():
             rut = self.rut.text()
             nombre = self.nombre.text()
             procedencia = self.procedencia.text()
@@ -1075,29 +1230,22 @@ class Nuevo_usuario(base_newUser,form_newUser):
             contacto = self.contacto.text()
             customer = {'RUT': rut, 'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
             r = requests.post('http://127.0.0.1:8007/clientes', json = customer)
-        
-            customer = {'RUT': rut, 'Nombre': nombre, 'Procedencia': procedencia, 'Telefono': telefono, 'Correo': correo, 'Contacto': contacto}
-            #FALTA VERIFICAR EL 'r' ( 200 = OK, 404 = ERROR)
-            print(r)
-            self.submitted2.emit(rut, nombre, telefono, correo, procedencia, contacto)
-            self.addReserve = Agregar_reserva(customer)
-            QMessageBox.information(self, "Formulario correcto", "Usuario ingresado en el sistema", QMessageBox.Discard)
-            self.close()
-            self.addReserve.show()
+            resp = r.json()
+            if(resp['message'] == 'Internal Server Error'):
+                QMessageBox.warning(self, "Warning", "¡El rut del usuario ingresado ya existe!", QMessageBox.Ok)
+            else:       
+                customer = {'RUT': rut, 'Nombre': nombre, 'Procedencia': procedencia, 'Telefono': telefono, 'Correo': correo, 'Contacto': contacto}
+                self.submitted2.emit(rut, nombre, telefono, correo, procedencia, contacto)
+                self.addReserve = Agregar_reserva(customer)
+                QMessageBox.information(self, "Formulario correcto", "Usuario ingresado en el sistema", QMessageBox.Ok)
+                self.close()
+                self.addReserve.show()
         else:          
-            QMessageBox.warning(self, "Formulario incorrecto", "Validación incorrecta", QMessageBox.Discard)
+            QMessageBox.warning(self, "Formulario incorrecto", "Validación incorrecta", QMessageBox.Ok)
  
-        
-        #print(r)"""
-        #if(r == "<Response [200]>"):
-
-        #customer = [rut, nombre, procedencia, telefono, correo, contacto]
-
-        #self.submitted.emit(rut, nombre, telefono, correo, procedencia, contacto)
-        #self.close()
     def validar_rut(self):
         rut = self.rut.text()
-        validar = re.match (('^[0-9a-zA-Z]+$')  , rut, re.I)
+        validar = re.match ('^[0-9]{7,}[-][0-9Kk]$', rut, re.I)
         if rut == "":
             self.rut.setStyleSheet("border: 1px solid yellow;")
             return False
@@ -1110,7 +1258,7 @@ class Nuevo_usuario(base_newUser,form_newUser):
 
     def validar_telefono(self):
         telefono = self.telefono.text()
-        validar = re.match (('^[ 0-9]+$')  , telefono)
+        validar = re.match (('^[0-9]+$')  , telefono)
         if telefono == "":
             self.rut.setStyleSheet("border: 1px solid yellow;")
             return False
@@ -1138,7 +1286,7 @@ class Nuevo_usuario(base_newUser,form_newUser):
         procedencia = self.procedencia.text()
         validar = re.match('^[a-z\sáéíóúàèìòùäëïöüñ]+$', procedencia, re.I)
         if procedencia == "":
-            self.procedenvalidar_rutcia.setStyleSheet("border: 1px solid yellow;")
+            self.procedencia.setStyleSheet("border: 1px solid yellow;")
             return False
         elif not validar:
             self.procedencia.setStyleSheet("border: 1px solid red;")
@@ -1173,6 +1321,35 @@ class Nuevo_usuario(base_newUser,form_newUser):
             self.contacto.setStyleSheet("border: 1px solid green;")
             return True
     
+class Editar_Precio(base_edp, form_edp):
+     submitted = qtc.pyqtSignal()
+     
+     def __init__(self):
+        super(base_edp, self).__init__()
+        self.setupUi(self)
+    
+        #Consulta del precio actual a la bd
+        r = requests.get("http://127.0.0.1:8007/cabanas/1")
+        precioActual = r.json()['data'][0]['Precio']
+        self.precio_label.setText(str(precioActual))
+        self.precio.setValue(precioActual)
+
+
+        self.confirmar.clicked.connect(self.aceptar)
+
+     def aceptar(self):
+        precio = self.precio.value()
+        precioObj = { 'precio': precio }
+        ret = QMessageBox.warning(self,"Warning", "¿Está seguro que desea cambiar el precio de las cabañas?", QMessageBox.Yes | QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            r = requests.put('http://127.0.0.1:8007/cabanas/precio', json = precioObj)
+            self.submitted.emit()
+            self.close()
+
+
+
+    
+
 
     
     

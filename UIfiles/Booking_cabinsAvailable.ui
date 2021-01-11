@@ -140,6 +140,13 @@ font-weight:bold;</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cab1_2</tabstop>
+  <tabstop>cab2_2</tabstop>
+  <tabstop>cab3_2</tabstop>
+  <tabstop>precio</tabstop>
+  <tabstop>cancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

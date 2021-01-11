@@ -256,6 +256,13 @@ font-weight:bold;</string>
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>checkin</tabstop>
+  <tabstop>checkout</tabstop>
+  <tabstop>desc</tabstop>
+  <tabstop>precio</tabstop>
+  <tabstop>pushButton_2</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
