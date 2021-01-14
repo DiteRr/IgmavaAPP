@@ -65,7 +65,7 @@ uifile_16 = 'UIfiles/editPrecio.ui'
 form_edp, base_edp = uic.loadUiType(uifile_16)
 
 
-session = smtplib.SMTP('smtp.gmail.com', 587) #Me funciona declarandolo acá!
+#session = smtplib.SMTP('smtp.gmail.com', 587) #Me funciona declarandolo acá!
 
 
 class Tabs(base_1, form_1):
@@ -131,6 +131,14 @@ class Tabs(base_1, form_1):
         
         #--Tab calendar--#
         self.reservas_tab.clicked.connect(self.reservas)
+        
+        # set up a timer that automatically updates every second
+        self.lcd.setMinimumWidth(80)
+        timer = QTimer(self)
+        timer.timeout.connect(self.showTime)
+        timer.start(1000)
+        self.showTime()
+        #--
 
         #--Tab customer--#
         self.deployCustomers()
@@ -145,11 +153,30 @@ class Tabs(base_1, form_1):
         now = QDate.currentDate()
         self.fecha.setDate(now)
         self.deployReservas()
-        self.buscar_fecha.clicked.connect(self.buscarF)
+        self.fecha.dateChanged.connect(self.buscarF)
+        self.fecha.dateChanged.connect(self.labelDate)
+        self.labelDate()
         
         self.deployCabins()
         self.tableWidgetCab.itemDoubleClicked.connect(self.doubleClickCab)
         self.edp.clicked.connect(self.editP)
+    
+    def labelDate(self):
+        # label to show the long name form of the selected date
+        # format US style like "Thursday, February 20, 2020"
+        select = self.fecha.date()
+        weekday, month = select.dayOfWeek(), select.month()
+        day, year = str(select.day()), str(select.year())
+        week_day, word_month = QDate.longDayName(weekday), QDate.longMonthName(month)
+        self.label_date.setText(week_day + " " + day + " " + word_month + ", " + year)
+    
+    def showTime(self):
+        # keep the current time updated
+        time = QTime.currentTime()
+        text = time.toString("hh:mm")
+        if time.second() % 2 == 0:
+            text.replace(text[2], '')
+        self.lcd.display(text)
 
     @qtc.pyqtSlot()
     def deployCabins(self):
@@ -394,7 +421,6 @@ class Tabs(base_1, form_1):
         self.editPrecio = Editar_Precio()
         self.editPrecio.submitted.connect(self.deployCabins)
         self.editPrecio.show()
-
 
 class Observacion_Cabana(base_obs, form_obs):
     def __init__(self, cab):
@@ -1344,14 +1370,7 @@ class Editar_Precio(base_edp, form_edp):
         if ret == QMessageBox.Yes:
             r = requests.put('http://127.0.0.1:8007/cabanas/precio', json = precioObj)
             self.submitted.emit()
-            self.close()
-
-
-
-    
-
-
-    
+            self.close()    
     
 if __name__ == '__main__':
     app = QApplication(sys.argv)
