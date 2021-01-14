@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Editar reserva</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(255, 255, 255);</string>
@@ -216,7 +216,7 @@ font-weight: bold;</string>
     <string>Editar Reserva </string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="cancelar">
    <property name="geometry">
     <rect>
      <x>270</x>
@@ -261,7 +261,7 @@ font-weight:bold;</string>
   <tabstop>checkout</tabstop>
   <tabstop>desc</tabstop>
   <tabstop>precio</tabstop>
-  <tabstop>pushButton_2</tabstop>
+  <tabstop>cancelar</tabstop>
  </tabstops>
  <resources/>
  <connections/>

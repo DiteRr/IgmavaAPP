@@ -343,16 +343,18 @@ class Tabs(base_1, form_1):
     
     def remove(self):
         rut = self.rut.text()
-        print(rut)
-        ret = QMessageBox.warning(self,"Warning", "¿Está seguro que desea eliminar el cliente?", QMessageBox.Yes | QMessageBox.No)
-        if ret == QMessageBox.Yes:
-            r = requests.delete('http://127.0.0.1:8007/clientes/{}'.format(rut))
-            r2= r.json()
-            if(r2['message'] == 'Internal Server Error'):
-                QMessageBox.warning(self,"Warning", "No se pudo eliminar, debido a que posee reservas disponibles. Para poder removerlo necesita eliminar todo su historial de reservas.", QMessageBox.Ok)
-            else:
-                QMessageBox.information(self,"Information", "El cliente se eliminó satisfactoriamente", QMessageBox.Ok)
-                self.deployCustomers()
+        if(rut == "00000000-0"):
+            QMessageBox.warning(self,"Warning", "No se puede eliminar el rut 00000000-0 (Deshabilitador de cabañas)", QMessageBox.Ok)
+        else:
+            ret = QMessageBox.warning(self,"Warning", "¿Está seguro que desea eliminar el cliente?", QMessageBox.Yes | QMessageBox.No)
+            if ret == QMessageBox.Yes:
+                r = requests.delete('http://127.0.0.1:8007/clientes/{}'.format(rut))
+                r2= r.json()
+                if(r2['message'] == 'Internal Server Error'):
+                    QMessageBox.warning(self,"Warning", "No se pudo eliminar, debido a que posee reservas disponibles. Para poder removerlo necesita eliminar todo su historial de reservas.", QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self,"Information", "El cliente se eliminó satisfactoriamente", QMessageBox.Ok)
+                    self.deployCustomers()
     
     def emailSend(self):
         def simpleSend(recver,subject,messag):
@@ -513,7 +515,9 @@ class Anadir_Observacion_Cabana(base_o, form_o):
         self.tipo.textChanged.connect(self.validar_tipo)
         self.descripcion.textChanged.connect(self.validar_descripcion)
 
+        #== EVENTOS ==#
         self.aceptar.clicked.connect(self.accept)
+        self.cancelar.clicked.connect(self.cancel)
     
     def accept(self):
         if self.validar_descripcion() and self.validar_tipo():
@@ -555,6 +559,9 @@ class Anadir_Observacion_Cabana(base_o, form_o):
         else:
             self.tipo.setStyleSheet("border: 1px solid green;")
             return True
+    
+    def cancel(self):
+        self.close()
 
 class Deshabilitar_Cabana(base_desh, form_desh):
 
@@ -566,8 +573,10 @@ class Deshabilitar_Cabana(base_desh, form_desh):
         self.setupUi(self)
         self.aceptar.clicked.connect(self.aceptarDesh)
 
+        #== EVENTOS ==#
         self.tipo.textChanged.connect(self.validar_tipo)
         self.descripcion.textChanged.connect(self.validar_descripcion)
+        self.cancelar.clicked.connect(self.cancel)
 
     
      
@@ -618,6 +627,8 @@ class Deshabilitar_Cabana(base_desh, form_desh):
         else:
             self.tipo.setStyleSheet("border: 1px solid green;")
             return True
+    def cancel(self):
+        self.close()
 
 class Arreglado_Cabana(base_arr, form_arr):
     submitted = qtc.pyqtSignal()
@@ -815,6 +826,7 @@ class Editar_Reserva(base_editReserva, form_editReserva):
         #== EVENTOS ==#
 
         self.precio.clicked.connect(self.disponibilidad)
+        self.cancelar.clicked.connect(self.cancel)
         
     def disponibilidad(self):
      
@@ -836,8 +848,12 @@ class Editar_Reserva(base_editReserva, form_editReserva):
     @qtc.pyqtSlot(str,str,str,str,str,str)
     def move_data(self, ids, rut, datecheckout, datecheckin, costo, pagado):
         self.submitted.emit(ids, rut, datecheckout, datecheckin, costo, pagado)
+    
+    def cancel(self):
+        self.close()
 
 class Disponibilidad_reserva_usuario(form_disp, base_disp):
+    print("hola")
 
     submitted2 = qtc.pyqtSignal(str,str,str,str,str,str)
          
@@ -883,12 +899,16 @@ class Disponibilidad_reserva_usuario(form_disp, base_disp):
             self.cabs.append(2)
             
         if self.cab3_2.isChecked() == True:
-            self.cabs.append(3)              
-        
-        self.aceptarReserva = Aceptar_Reserva_Usuario([self.rut, self.cabs, self.desc, self.dateCheckin, self.dateCheckout, self.id])
-        self.aceptarReserva.submitted3.connect(self.move_data)
-        self.close()
-        self.aceptarReserva.show()
+            self.cabs.append(3)  
+
+                    
+        if(self.cabs != []):
+            self.aceptarReserva = Aceptar_Reserva_Usuario([self.rut, self.cabs, self.desc, self.dateCheckin, self.dateCheckout, self.id])
+            self.aceptarReserva.submitted3.connect(self.move_data)
+            self.close()
+            self.aceptarReserva.show()
+        else:
+            QMessageBox.warning(self,"Warning", "No ha seleccionado ninguna cabaña!", QMessageBox.Ok)
     
     @qtc.pyqtSlot(str,str,str,str,str,str)
     def move_data(self, ids, rut, datecheckout, datecheckin, costo, pagado):
@@ -966,6 +986,7 @@ class Editar_Usuario(base_editUser, form_editUser):
         #== EVENTOS ==#
 
         self.aceptar.clicked.connect(self.confirmed)
+        self.cancelar.clicked.connect(self.cancel)
     
     def confirmed(self):
         if self.validar_nombre() and self.validar_email() and self.validar_telefono() and self.validar_procedencia() and self.validar_contacto():
@@ -978,14 +999,17 @@ class Editar_Usuario(base_editUser, form_editUser):
             customer = {'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
             r = requests.put('http://127.0.0.1:8007/clientes/{}'.format(rut), json = customer)
             #FALTA VERIFICAR EL 'r' ( 200 = OK, 404 = ERROR)
-            QMessageBox.information(self, "Formulario correcto", "Usuario actualizado", QMessageBox.Discard)
+            QMessageBox.information(self, "Formulario correcto", "Usuario actualizado", QMessageBox.Ok)
             #print(r)
             #if(r == "<Response [200]>"):
             self.submitted.emit(rut, nombre, telefono, correo, procedencia, contacto)
             self.close()
            
         else:          
-            QMessageBox.warning(self, "Formulario incorrecto", "Validación incorrecta", QMessageBox.Discard)
+            QMessageBox.warning(self, "Formulario incorrecto", "Validación incorrecta", QMessageBox.Ok)
+    
+    def cancel(self):
+        self.close()
  
     
     #==VALIDACIONES==#
@@ -1115,6 +1139,7 @@ class Agregar_reserva(base_addR, form_addR):
         #== EVENTOS ==#
 
         self.precio.clicked.connect(self.disponibilidad)
+        self.cancelar.clicked.connect(self.cancel)
         
     
     def disponibilidad(self):
@@ -1130,6 +1155,9 @@ class Agregar_reserva(base_addR, form_addR):
 
         self.cabinsAvailable = Cabañas_disponibles(self.rut, result, desc, dateCheckin, dateCheckout)
         self.cabinsAvailable.show()
+    
+    def cancel(self):
+        self.close()
 
 class Cabañas_disponibles(base_available, form_available):
     def __init__(self, rut, cabins, desc, dateCheckin, dateCheckout):
@@ -1176,9 +1204,12 @@ class Cabañas_disponibles(base_available, form_available):
         if self.cab3.isChecked() == True:
             self.cabs.append(3)              
         
-        self.aceptarReserva = Aceptar_reserva(self.rut, self.cabs, self.desc, self.dateCheckin, self.dateCheckout)
-        self.close()
-        self.aceptarReserva.show()
+        if(self.cabs != []):
+            self.aceptarReserva = Aceptar_reserva(self.rut, self.cabs, self.desc, self.dateCheckin, self.dateCheckout)
+            self.close()
+            self.aceptarReserva.show()
+        else:
+            QMessageBox.warning(self,"Warning", "No ha seleccionado ninguna cabaña!", QMessageBox.Ok)
     
     def cancel(self):
         self.close()
@@ -1360,8 +1391,9 @@ class Editar_Precio(base_edp, form_edp):
         self.precio_label.setText(str(precioActual))
         self.precio.setValue(precioActual)
 
-
+        #== EVENTOS ==#
         self.confirmar.clicked.connect(self.aceptar)
+        self.cancelar.clicked.connect(self.cancel)
 
      def aceptar(self):
         precio = self.precio.value()
@@ -1370,7 +1402,10 @@ class Editar_Precio(base_edp, form_edp):
         if ret == QMessageBox.Yes:
             r = requests.put('http://127.0.0.1:8007/cabanas/precio', json = precioObj)
             self.submitted.emit()
-            self.close()    
+            self.close()
+    
+     def cancel(self):
+         self.close()
     
 if __name__ == '__main__':
     app = QApplication(sys.argv)
