@@ -24,7 +24,7 @@ class Ui_fixedUp(object):
         self.checkBox.setSizePolicy(sizePolicy)
         self.checkBox.setObjectName("checkBox")
         self.label_6 = QtWidgets.QLabel(fixedUp)
-        self.label_6.setGeometry(QtCore.QRect(130, 60, 91, 21))
+        self.label_6.setGeometry(QtCore.QRect(80, 40, 191, 51))
         self.label_6.setStyleSheet("font: 57 14pt \"Ubuntu\";\n"
 "font-weight: bold;")
         self.label_6.setObjectName("label_6")

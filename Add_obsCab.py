@@ -18,7 +18,7 @@ class Ui_Add_ObsCab(object):
         Add_ObsCab.setStyleSheet("background-color: rgb(255, 255, 255);")
         Add_ObsCab.setModal(True)
         self.label_6 = QtWidgets.QLabel(Add_ObsCab)
-        self.label_6.setGeometry(QtCore.QRect(180, 40, 179, 16))
+        self.label_6.setGeometry(QtCore.QRect(170, 30, 291, 51))
         self.label_6.setStyleSheet("font: 57 14pt \"Ubuntu\";\n"
 "font-weight: bold;")
         self.label_6.setObjectName("label_6")

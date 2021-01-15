@@ -349,7 +349,7 @@ class Ui_tabs(object):
         self.tableWidgetC.verticalHeader().setStretchLastSection(True)
         self.horizontalLayout.addWidget(self.tableWidgetC)
         self.label_5 = QtWidgets.QLabel(self.tab)
-        self.label_5.setGeometry(QtCore.QRect(10, 320, 139, 22))
+        self.label_5.setGeometry(QtCore.QRect(10, 300, 221, 41))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -392,7 +392,7 @@ class Ui_tabs(object):
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
 
         self.retranslateUi(tabs)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(tabs)
         tabs.setTabOrder(self.reservas_tab, self.search)
         tabs.setTabOrder(self.search, self.buscar)

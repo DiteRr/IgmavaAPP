@@ -53,7 +53,7 @@ class Ui_Disable_cab(object):
         self.checkout.setObjectName("checkout")
         self.horizontalLayout_2.addWidget(self.checkout)
         self.label_6 = QtWidgets.QLabel(Disable_cab)
-        self.label_6.setGeometry(QtCore.QRect(230, 40, 179, 22))
+        self.label_6.setGeometry(QtCore.QRect(210, 30, 321, 61))
         self.label_6.setStyleSheet("font: 57 14pt \"Ubuntu\";\n"
 "font-weight: bold;")
         self.label_6.setObjectName("label_6")
