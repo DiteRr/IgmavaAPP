@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>addBooking</class>
+ <widget class="QDialog" name="addBooking">
   <property name="windowModality">
    <enum>Qt::NonModal</enum>
   </property>
@@ -176,10 +176,10 @@ font-weight:bold;</string>
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>20</y>
-     <width>171</width>
-     <height>31</height>
+     <x>160</x>
+     <y>10</y>
+     <width>331</width>
+     <height>61</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -298,7 +298,7 @@ color: rgb(0,0,0);</string>
     <string>Disponibilidad</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="cancelar">
    <property name="geometry">
     <rect>
      <x>220</x>

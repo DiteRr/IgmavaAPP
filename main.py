@@ -15,62 +15,48 @@ from PyQt5 import uic
 from PyQt5 import QtCore as qtc
 import dateutil.parser
 
-#load both ui file
-uifile_1 = 'UIfiles/Tab.ui'
-form_1, base_1 = uic.loadUiType(uifile_1)
+from Tab import Ui_tabs
+from Rutmodal import Ui_Rutmodal
+from UserBooking import Ui_UserBooking
+from AceptarReserva import Ui_Aceptar_Reserva
+from Add_obsCab import Ui_Add_ObsCab 
+from addBooking import Ui_addBooking
+from Booking_AceptarReserva import Ui_Booking_aceptarReserva
+from Booking_cabinsAvailable import Ui_Booking_cabinsAvailable
+from cabinsAvailable import Ui_cabinsAvailable
+from Disable_cab import Ui_Disable_cab
+from editBooking import Ui_editBooking
+from editPrecio import Ui_editPrecio
+from EditUser import Ui_EditUser
+from fixedUp import Ui_fixedUp
+from host import Ui_dialog
+from newUser import Ui_newUser
+from obsCab import Ui_obsCab
 
-uifile_2 = 'UIfiles/Rutmodal.ui'
-form_2, base_2 = uic.loadUiType(uifile_2)
+global IPs 
+IPs = "127.0.0.1:8007"
 
-uifile_3 = 'UIfiles/EditUser.ui'
-form_editUser, base_editUser = uic.loadUiType(uifile_3)
-
-uifile_4 = 'UIfiles/addBooking.ui'
-form_addR, base_addR = uic.loadUiType(uifile_4)
-
-uifile_5 = 'UIfiles/newUser.ui'
-form_newUser, base_newUser = uic.loadUiType(uifile_5)
-
-uifile_6 = 'UIfiles/cabinsAvailable.ui'
-form_available, base_available = uic.loadUiType(uifile_6)
-
-uifile_7 = 'UIfiles/AceptarReserva.ui'
-form_reserva, base_reserva = uic.loadUiType(uifile_7)
-
-uifile_8 = 'UIfiles/UserBooking.ui'
-form_reservasUser, base_reservasUser = uic.loadUiType(uifile_8)
-
-uifile_9 = 'UIfiles/editBooking.ui'
-form_editReserva, base_editReserva = uic.loadUiType(uifile_9)
-
-uifile_10 = 'UIfiles/Booking_cabinsAvailable.ui'
-form_disp, base_disp = uic.loadUiType(uifile_10)
-
-uifile_11 = 'UIfiles/Booking_AceptarReserva.ui'
-form_acceptR, base_acceptR = uic.loadUiType(uifile_11)
-
-uifile_12 = 'UIfiles/obsCab.ui'
-form_obs, base_obs = uic.loadUiType(uifile_12)
-
-uifile_13 = 'UIfiles/Disable_cab.ui'
-form_desh, base_desh = uic.loadUiType(uifile_13)
-
-uifile_14 = 'UIfiles/Add_obsCab.ui'
-form_o, base_o = uic.loadUiType(uifile_14)
-
-uifile_15 = 'UIfiles/fixedUp.ui'
-form_arr, base_arr = uic.loadUiType(uifile_15)
-
-uifile_16 = 'UIfiles/editPrecio.ui'
-form_edp, base_edp = uic.loadUiType(uifile_16)
+class Host(QtWidgets.QDialog, Ui_dialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        Ui_dialog.__init__(self)
+        self.setupUi(self)
+        #== Eventos ==# 
+        self.link.clicked.connect(self.linked)
 
 
-#session = smtplib.SMTP('smtp.gmail.com', 587) #Me funciona declarandolo acá!
+    def linked(self):
+        global IPs
+        IPs = self.ip.text()
+        self.tab = Tabs()
+        self.close()
+        self.tab.show()
 
-
-class Tabs(base_1, form_1):
-    def __init__(self,*args, **kwargs):
-        super(base_1, self).__init__(*args, **kwargs)
+class Tabs(QtWidgets.QWidget, Ui_tabs):
+    def __init__(self):
+        QtWidgets.QWidget.__init__(self)
+        Ui_tabs.__init__(self)
+        #super(base_1, self).__init__(*args, **kwargs)
         self.setupUi(self)
         
         #-- Table customer --#
@@ -128,7 +114,8 @@ class Tabs(base_1, form_1):
 
         
         #== EVENTOS == #
-        
+        #self.host = Host()
+        #self.host.show()
         #--Tab calendar--#
         self.reservas_tab.clicked.connect(self.reservas)
         
@@ -181,7 +168,7 @@ class Tabs(base_1, form_1):
     @qtc.pyqtSlot()
     def deployCabins(self):
         
-        r = requests.get("http://127.0.0.1:8007/cabanas")
+        r = requests.get("http://{}/cabanas".format(IPs))
         cabins = r.json()['data']
         #print(cabins)
         self.tableWidgetCab.setRowCount(0)  
@@ -216,7 +203,7 @@ class Tabs(base_1, form_1):
     def deployReservas(self):
         
         date = self.fecha.date().toString(Qt.ISODate)          
-        r = requests.get("http://127.0.0.1:8007/ocupado/{}".format(date))
+        r = requests.get("http://{}/ocupado/{}".format(IPs, date))
         cabinsdisp = r.json()['data']
         #print(cabinsdisp)
         Cabs = { "0": 0, "1": 1, "2": 2} #Todas disponibles 
@@ -243,9 +230,8 @@ class Tabs(base_1, form_1):
     def buscarF(self):
         
         date = self.fecha.date().toString(Qt.ISODate)          
-        r = requests.get("http://127.0.0.1:8007/ocupado/{}".format(date))
+        r = requests.get("http://{}/ocupado/{}".format(IPs,date))
         cabinsdisp = r.json()['data']
-        print(cabinsdisp)
         Cabs = { "0": 0, "1": 1, "2": 2} #Todas disponibles 
         for disp in cabinsdisp: #No disponibles  
             i = disp['IDcabin'] - 1
@@ -269,7 +255,7 @@ class Tabs(base_1, form_1):
 
 
     def deployCustomers(self):
-        result = requests.get('http://127.0.0.1:8007//clientes')  
+        result = requests.get('http://{}//clientes'.format(IPs))  
         customers = result.json()['data']
         #print(customers)
         self.tableWidget.setRowCount(0)
@@ -298,7 +284,7 @@ class Tabs(base_1, form_1):
         self.procedencia.setText(procedencia)
         self.contacto.setText(contacto)
         
-        result = requests.get('http://127.0.0.1:8007//clientes')  
+        result = requests.get('http://{}//clientes'.format(IPs))  
         customers = result.json()['data']
 
         self.tableWidget.setRowCount(0)
@@ -348,7 +334,7 @@ class Tabs(base_1, form_1):
         else:
             ret = QMessageBox.warning(self,"Warning", "¿Está seguro que desea eliminar el cliente?", QMessageBox.Yes | QMessageBox.No)
             if ret == QMessageBox.Yes:
-                r = requests.delete('http://127.0.0.1:8007/clientes/{}'.format(rut))
+                r = requests.delete('http://{}/clientes/{}'.format(IPs, rut))
                 r2= r.json()
                 if(r2['message'] == 'Internal Server Error'):
                     QMessageBox.warning(self,"Warning", "No se pudo eliminar, debido a que posee reservas disponibles. Para poder removerlo necesita eliminar todo su historial de reservas.", QMessageBox.Ok)
@@ -370,11 +356,8 @@ class Tabs(base_1, form_1):
             message.attach(MIMEText(messag, 'plain'))
             text = message.as_string()
             try:
-                print("1")
                 session = smtplib.SMTP('smtp.gmail.com', 587)
-                print("2")
                 session.starttls()
-                print("3")
                 session.login(sender, sendpass)
                 session.sendmail(sender, recver, text)
                 session.quit()
@@ -398,7 +381,6 @@ class Tabs(base_1, form_1):
     
     
         result = moroseMail("Abada Kadabra",50000,"igmavamailtest@gmail.com")
-        print(result)
     
     def searchRut(self):
         rut = self.search.text()
@@ -406,7 +388,7 @@ class Tabs(base_1, form_1):
             self.deployCustomers()
         else:
             try:
-                r = requests.get('http://127.0.0.1:8007//clientes/{}'.format(rut))
+                r = requests.get('http://{}//clientes/{}'.format(IPs, rut))
                 customer = r.json()['data'][0]
                 #print(customer)
                 self.tableWidget.setRowCount(1) 
@@ -424,11 +406,11 @@ class Tabs(base_1, form_1):
         self.editPrecio.submitted.connect(self.deployCabins)
         self.editPrecio.show()
 
-class Observacion_Cabana(base_obs, form_obs):
+class Observacion_Cabana(QtWidgets.QWidget, Ui_obsCab):
     def __init__(self, cab):
-        super(base_obs, self).__init__()
+        QtWidgets.QWidget.__init__(self)
+        Ui_obsCab.__init__(self)
         self.setupUi(self)
-        #print(cab)
         self.cab_id = cab[0]
 
         #-- Table customer --#
@@ -458,7 +440,7 @@ class Observacion_Cabana(base_obs, form_obs):
 
 
     def despliegueObs(self):
-        r = requests.get('http://127.0.0.1:8007/observaciones/{}'.format(self.cab_id))
+        r = requests.get('http://{}/observaciones/{}'.format(IPs, self.cab_id))
         observaciones = r.json()['data']
         #print(observaciones)
 
@@ -473,7 +455,7 @@ class Observacion_Cabana(base_obs, form_obs):
     
     @qtc.pyqtSlot()
     def update_despliegueObs(self):
-        r = requests.get('http://127.0.0.1:8007/observaciones/{}'.format(self.cab_id))
+        r = requests.get('http://{}/observaciones/{}'.format(IPs, self.cab_id))
         observaciones = r.json()['data']
         #print(observaciones)
 
@@ -503,12 +485,13 @@ class Observacion_Cabana(base_obs, form_obs):
         self.arre.submitted.connect(self.update_despliegueObs)
         self.arre.show()
 
-class Anadir_Observacion_Cabana(base_o, form_o):
+class Anadir_Observacion_Cabana(QtWidgets.QDialog, Ui_Add_ObsCab):
 
     submitted = qtc.pyqtSignal()
 
     def __init__(self, id_cab):
-        super(base_o, self).__init__()
+        QDialog.__init__(self)
+        Ui_Add_ObsCab.__init__(self)
         self.setupUi(self)
         self.cab_id = id_cab
 
@@ -526,7 +509,7 @@ class Anadir_Observacion_Cabana(base_o, form_o):
             tipo = self.tipo.text()
             descripcion = self.descripcion.toPlainText()
             obsCab = {'cabin': self.cab_id, 'tipo': tipo, 'fecha': date, 'descripcion': descripcion, 'arreglado': '0'}
-            r = requests.post('http://127.0.0.1:8007/observaciones/', json = obsCab)
+            r = requests.post('http://{}/observaciones/'.format(IPs), json = obsCab)
             self.submitted.emit()
             self.close()
             QMessageBox.information(self, "Formulario correcto", "Observacion agregada a la cabaña", QMessageBox.Ok)
@@ -563,14 +546,16 @@ class Anadir_Observacion_Cabana(base_o, form_o):
     def cancel(self):
         self.close()
 
-class Deshabilitar_Cabana(base_desh, form_desh):
+class Deshabilitar_Cabana(QtWidgets.QDialog, Ui_Disable_cab):
 
     submitted = qtc.pyqtSignal()
 
     def __init__(self, id_cab):
-        super(base_desh, self).__init__()
-        self.cab_id = id_cab
+        QDialog.__init__(self)
+        Ui_Disable_cab.__init__(self)
         self.setupUi(self)
+
+        self.cab_id = id_cab
         self.aceptar.clicked.connect(self.aceptarDesh)
 
         #== EVENTOS ==#
@@ -589,13 +574,13 @@ class Deshabilitar_Cabana(base_desh, form_desh):
             
             #Observacion cabaña, deshabilitada
             obsCab = {'cabin': self.cab_id, 'tipo': tipo, 'fecha': dateCheckin, 'descripcion': descripcion, 'arreglado': '0'}
-            r = requests.post('http://127.0.0.1:8007/observaciones/', json = obsCab)
+            r = requests.post('http://{}/observaciones/'.format(IPs), json = obsCab)
             #print(r)
             self.submitted.emit()
     
             #Deshabilitar cabaña
             data = {'RUT': '00000000-0', 'in': dateCheckin, 'out': dateCheckout, 'costo': 0 , 'pagado': 0, 'cabins': [int(self.cab_id)]}
-            r2 = requests.post('http://127.0.0.1:8007//reservas', json = data)
+            r2 = requests.post('http://{}//reservas'.format(IPs), json = data)
             #print(r2)
             QMessageBox.information(self, "Formulario correcto", "Cabaña deshabilitada!", QMessageBox.Ok)
             self.close()
@@ -630,11 +615,13 @@ class Deshabilitar_Cabana(base_desh, form_desh):
     def cancel(self):
         self.close()
 
-class Arreglado_Cabana(base_arr, form_arr):
+class Arreglado_Cabana(QtWidgets.QDialog, Ui_fixedUp):
     submitted = qtc.pyqtSignal()
     def __init__(self, cabObs, cab_id):
-        super(base_arr, self).__init__()
+        QDialog.__init__(self)
+        Ui_fixedUp.__init__(self)
         self.setupUi(self)
+
         self.id = cabObs[0]
         self.tipo = cabObs[1]
         self.fecha = cabObs[2]
@@ -645,17 +632,18 @@ class Arreglado_Cabana(base_arr, form_arr):
     def accept(self):
         if self.checkBox.isChecked() == True:
             obsCab = {'cabin': self.cab_id, 'tipo': self.tipo, 'fecha': self.fecha, 'descripcion': self.descripcion, 'arreglado': '1'}
-            r = requests.put('http://127.0.0.1:8007/observaciones/{}'.format(self.id), json = obsCab)
+            r = requests.put('http://{}/observaciones/{}'.format(IPs).format(self.id), json = obsCab)
             self.submitted.emit()
-            print(r)
             self.close()
         else:    
             self.close()
 
-class Reservas_Usuario(base_reservasUser, form_reservasUser):
+class Reservas_Usuario(QtWidgets.QMainWindow, Ui_UserBooking):
     def __init__(self, rut):
-        super(base_reservasUser, self).__init__()
+        QtWidgets.QMainWindow.__init__(self)
+        Ui_UserBooking.__init__(self)
         self.setupUi(self)
+        
         self.r = rut #rut
 
 
@@ -683,9 +671,8 @@ class Reservas_Usuario(base_reservasUser, form_reservasUser):
         self.eliminarReserva.clicked.connect(self.remove)
     
     def deployReservas(self, rut):
-        r = requests.get('http://127.0.0.1:8007/reservasRut/{}'.format(rut))
+        r = requests.get('http://{}/reservasRut/{}'.format(IPs, rut))
         reservas = r.json()['data']
-        print(reservas)
 
         self.reservasRUT.setRowCount(0)
         for row_number, customer in enumerate(reservas):
@@ -729,7 +716,7 @@ class Reservas_Usuario(base_reservasUser, form_reservasUser):
         self.costo.setText(costo)
         self.pagado.setText(pagado)
 
-        r = requests.get('http://127.0.0.1:8007/reservasRut/{}'.format(rut))
+        r = requests.get('http://{}/reservasRut/{}'.format(IPs, rut))
         reservas = r.json()['data']
         #print(reservas)
 
@@ -795,19 +782,19 @@ class Reservas_Usuario(base_reservasUser, form_reservasUser):
     
     def remove(self):
         ids = self.id.text()
-        print(ids)
         ret = QMessageBox.warning(self,"Warning", "¿Está seguro que desea eliminar la reserva?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
-            r = requests.delete('http://127.0.0.1:8007/reservas/{}'.format(ids))
+            r = requests.delete('http://{}/reservas/{}'.format(IPs, ids))
             QMessageBox.information(self,"Information", "La reserva se eliminó satisfactoriamente!", QMessageBox.Ok)
             self.deployReservas(self.r)
     
-class Editar_Reserva(base_editReserva, form_editReserva):
+class Editar_Reserva(QtWidgets.QDialog, Ui_editBooking):
     
     submitted = qtc.pyqtSignal(str,str,str,str,str,str)
     
     def __init__(self, reserva):
-        super(base_editReserva, self).__init__()
+        QDialog.__init__(self)
+        Ui_editBooking.__init__(self)
         self.setupUi(self)
         #print(reserva)
         
@@ -836,7 +823,7 @@ class Editar_Reserva(base_editReserva, form_editReserva):
         dateCheckin = self.checkin.date().toString(Qt.ISODate)
         dateCheckout = self.checkout.date().toString(Qt.ISODate)
         #print(dateCheckout)
-        r = requests.get("http://127.0.0.1:8007/disponible/{}/{}".format(dateCheckin,dateCheckout))
+        r = requests.get("http://{}/disponible/{}/{}".format(IPs, dateCheckin,dateCheckout))
         result = r.json()['data'][0]['Cabins']
 
    
@@ -852,13 +839,13 @@ class Editar_Reserva(base_editReserva, form_editReserva):
     def cancel(self):
         self.close()
 
-class Disponibilidad_reserva_usuario(form_disp, base_disp):
-    print("hola")
+class Disponibilidad_reserva_usuario(QtWidgets.QDialog, Ui_Booking_cabinsAvailable):
 
     submitted2 = qtc.pyqtSignal(str,str,str,str,str,str)
          
     def __init__(self, customer):
-        super(base_editUser, self).__init__()
+        QDialog.__init__(self)
+        Ui_Booking_cabinsAvailable.__init__(self)
         self.setupUi(self)
         #print(customer)   
         self.rut = customer[0]
@@ -918,11 +905,12 @@ class Disponibilidad_reserva_usuario(form_disp, base_disp):
     def cancel(self):
          self.close()
 
-class Aceptar_Reserva_Usuario(base_acceptR, form_acceptR):
+class Aceptar_Reserva_Usuario(QtWidgets.QDialog, Ui_Booking_aceptarReserva):
     submitted3 = qtc.pyqtSignal(str,str,str,str,str,str)
 
     def __init__(self, customer):
-        super(base_acceptR, self).__init__()
+        QDialog.__init__(self)
+        Ui_Booking_aceptarReserva.__init__(self)
         self.setupUi(self)
 
         self.rut = customer[0]
@@ -935,7 +923,7 @@ class Aceptar_Reserva_Usuario(base_acceptR, form_acceptR):
         self.totalCosto = 0
         for cab in self.cabs:
             #Me falta considerar los dias
-            r = requests.get('http://127.0.0.1:8007//cabanas/{}'.format(cab))
+            r = requests.get('http://{}//cabanas/{}'.format(IPs, cab))
             cabana = r.json()['data'][0]
             costo = cabana['Precio'] - cabana['Precio']*(self.desc/100)
             #print(costo)
@@ -953,8 +941,7 @@ class Aceptar_Reserva_Usuario(base_acceptR, form_acceptR):
     def aceptarReserva(self):
         data = {'RUT': self.rut, 'in': self.dateCheckin, 'out': self.dateCheckout, 'costo': self.totalCosto , 'pagado': '0', 'cabins': self.cabs}
 
-        r = requests.put('http://127.0.0.1:8007/reservas/{}'.format(self.id), json = data)  
-        print(r)
+        r = requests.put('http://{}/reservas/{}'.format(IPs, self.id), json = data)  
         #QMessageBox.information(self,"", "Reserva ingresada", QMessageBox.Ok)
         self.submitted3.emit(self.id, self.rut, self.dateCheckout, self.dateCheckin, str(self.totalCosto), '0')
         self.close()
@@ -962,12 +949,13 @@ class Aceptar_Reserva_Usuario(base_acceptR, form_acceptR):
     def cancel(self):
         self.close()
             
-class Editar_Usuario(base_editUser, form_editUser):
+class Editar_Usuario(QtWidgets.QDialog, Ui_EditUser):
 
     submitted = qtc.pyqtSignal(str,str,str,str,str,str)
 
     def __init__(self, customer):
-        super(base_editUser, self).__init__()
+        QDialog.__init__(self)
+        Ui_EditUser.__init__(self)
         self.setupUi(self)
 
         self.rut = customer[4]
@@ -997,7 +985,7 @@ class Editar_Usuario(base_editUser, form_editUser):
             correo = self.correo.text()
             contacto = self.contacto.text()
             customer = {'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
-            r = requests.put('http://127.0.0.1:8007/clientes/{}'.format(rut), json = customer)
+            r = requests.put('http://{}/clientes/{}'.format(IPs, rut), json = customer)
             #FALTA VERIFICAR EL 'r' ( 200 = OK, 404 = ERROR)
             QMessageBox.information(self, "Formulario correcto", "Usuario actualizado", QMessageBox.Ok)
             #print(r)
@@ -1078,14 +1066,14 @@ class Editar_Usuario(base_editUser, form_editUser):
             self.contacto.setStyleSheet("border: 1px solid green;")
             return True
 
-class Reservas_rut(base_2, form_2):
-
-    submitted = qtc.pyqtSignal(str,str,str,str,str,str)
+class Reservas_rut(QtWidgets.QDialog, Ui_Rutmodal):
     
-    def __init__(self):
-        super(base_2, self).__init__()
-        self.setupUi(self)
+    submitted = qtc.pyqtSignal(str,str,str,str,str,str)
 
+    def __init__(self):
+        QDialog.__init__(self)
+        Ui_Rutmodal.__init__(self)
+        self.setupUi(self)
 
         #== EVENTOS == #
         self.reservar_rut.clicked.connect(self.reservar)
@@ -1095,7 +1083,7 @@ class Reservas_rut(base_2, form_2):
         rut = self.rut_edit.text()
         #print(rut)
         #try:
-        r = requests.get('http://127.0.0.1:8007//clientes/{}'.format(rut))
+        r = requests.get('http://{}//clientes/{}'.format(IPs,rut))
         try:
             if(r.json()['data'] == []):
                 QMessageBox.information(self,"", "Usuario no existe", QMessageBox.Ok)
@@ -1118,9 +1106,10 @@ class Reservas_rut(base_2, form_2):
     def moveData(self, rut, nombre, telefono, correo, procedencia, contacto):
         self.submitted.emit(rut, nombre, telefono, correo, procedencia, contacto)
     
-class Agregar_reserva(base_addR, form_addR):
+class Agregar_reserva(QtWidgets.QDialog, Ui_addBooking):
     def __init__(self, customer):
-        super(base_addR, self).__init__()
+        QDialog.__init__(self)
+        Ui_addBooking.__init__(self)
         self.setupUi(self)
 
         #self.fechayhora = QtGui.QDateTimeEdit(self)
@@ -1129,7 +1118,6 @@ class Agregar_reserva(base_addR, form_addR):
         self.checkin.setDate(now)
         self.checkin.setMinimumDate(now)
         self.checkout.setMinimumDate(now)
-        print(now)
 
         self.rut = customer['RUT']
         #print(customer['Nombre'])
@@ -1149,8 +1137,7 @@ class Agregar_reserva(base_addR, form_addR):
         desc = self.desc.value()
         dateCheckin = self.checkin.date().toString(Qt.ISODate)
         dateCheckout = self.checkout.date().toString(Qt.ISODate)
-        print(dateCheckout)
-        r = requests.get("http://127.0.0.1:8007/disponible/{}/{}".format(dateCheckin,dateCheckout))
+        r = requests.get("http://{}/disponible/{}/{}".format(IPs, dateCheckin,dateCheckout))
         result = r.json()['data'][0]['Cabins']
 
         self.cabinsAvailable = Cabañas_disponibles(self.rut, result, desc, dateCheckin, dateCheckout)
@@ -1159,9 +1146,11 @@ class Agregar_reserva(base_addR, form_addR):
     def cancel(self):
         self.close()
 
-class Cabañas_disponibles(base_available, form_available):
+class Cabañas_disponibles(QtWidgets.QDialog, Ui_cabinsAvailable):
+
     def __init__(self, rut, cabins, desc, dateCheckin, dateCheckout):
-        super(base_available, self).__init__()
+        QDialog.__init__(self)
+        Ui_cabinsAvailable.__init__(self)
         self.setupUi(self)
         
         self.rut = rut
@@ -1214,9 +1203,10 @@ class Cabañas_disponibles(base_available, form_available):
     def cancel(self):
         self.close()
        
-class Aceptar_reserva(base_reserva, form_reserva):
+class Aceptar_reserva(QtWidgets.QDialog, Ui_Aceptar_Reserva):
     def __init__(self, rut, cabs, desc, dateCheckin, dateCheckout):
-        super(base_reserva, self).__init__()
+        QDialog.__init__(self)
+        Ui_Aceptar_Reserva.__init__(self)
         self.setupUi(self)
 
         self.rut = rut
@@ -1229,13 +1219,11 @@ class Aceptar_reserva(base_reserva, form_reserva):
         self.totalCosto = 0
         for cab in cabs:
             #Me falta considerar los dias
-            r = requests.get('http://127.0.0.1:8007//cabanas/{}'.format(cab))
+            r = requests.get('http://{}//cabanas/{}'.format(IPs, cab))
             cabana = r.json()['data'][0]
             costo = cabana['Precio'] - cabana['Precio']*(desc/100)
-            print(costo)
             self.totalCosto = int(self.totalCosto + costo) 
 
-        print(self.totalCosto)
         self.precio.setText(str(self.totalCosto))
 
         
@@ -1248,22 +1236,21 @@ class Aceptar_reserva(base_reserva, form_reserva):
     def aceptarReserva(self):
         data = {'RUT': self.rut, 'in': self.dateCheckin, 'out': self.dateCheckout, 'costo': self.totalCosto , 'pagado': '0', 'cabins': self.cabs}
 
-        print(data)
 
-        r = requests.post('http://127.0.0.1:8007//reservas', json = data)
-        print(r)
+        r = requests.post('http://{}/reservas'.format(IPs), json = data)
         QMessageBox.information(self,"", "Reserva ingresada", QMessageBox.Ok)
         self.close()
     
     def cancel(self):
         self.close()
    
-class Nuevo_usuario(base_newUser,form_newUser):
+class Nuevo_usuario(QtWidgets.QDialog, Ui_newUser):
 
     submitted2 = qtc.pyqtSignal(str,str,str,str,str,str)
 
     def __init__(self):
-        super(base_newUser, self).__init__()
+        QDialog.__init__(self)
+        Ui_newUser.__init__(self)
         self.setupUi(self)
 
         self.rut.textChanged.connect(self.validar_rut)
@@ -1286,7 +1273,7 @@ class Nuevo_usuario(base_newUser,form_newUser):
             correo = self.correo.text()
             contacto = self.contacto.text()
             customer = {'RUT': rut, 'nombre': nombre, 'procedencia': procedencia, 'telefono': telefono, 'correo': correo, 'contacto': contacto}
-            r = requests.post('http://127.0.0.1:8007/clientes', json = customer)
+            r = requests.post('http://{}/clientes'.format(IPs), json = customer)
             resp = r.json()
             if(resp['message'] == 'Internal Server Error'):
                 QMessageBox.warning(self, "Warning", "¡El rut del usuario ingresado ya existe!", QMessageBox.Ok)
@@ -1378,15 +1365,16 @@ class Nuevo_usuario(base_newUser,form_newUser):
             self.contacto.setStyleSheet("border: 1px solid green;")
             return True
     
-class Editar_Precio(base_edp, form_edp):
+class Editar_Precio(QtWidgets.QDialog, Ui_editPrecio):
      submitted = qtc.pyqtSignal()
      
      def __init__(self):
-        super(base_edp, self).__init__()
+        QDialog.__init__(self)
+        Ui_editPrecio.__init__(self)
         self.setupUi(self)
     
         #Consulta del precio actual a la bd
-        r = requests.get("http://127.0.0.1:8007/cabanas/1")
+        r = requests.get("http://{}/cabanas/1".format(IPs))
         precioActual = r.json()['data'][0]['Precio']
         self.precio_label.setText(str(precioActual))
         self.precio.setValue(precioActual)
@@ -1400,7 +1388,7 @@ class Editar_Precio(base_edp, form_edp):
         precioObj = { 'precio': precio }
         ret = QMessageBox.warning(self,"Warning", "¿Está seguro que desea cambiar el precio de las cabañas?", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
-            r = requests.put('http://127.0.0.1:8007/cabanas/precio', json = precioObj)
+            r = requests.put('http://{}/cabanas/precio'.format(IPs), json = precioObj)
             self.submitted.emit()
             self.close()
     
@@ -1409,6 +1397,6 @@ class Editar_Precio(base_edp, form_edp):
     
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = Tabs()
+    ex = Host()
     ex.show()
     sys.exit(app.exec_())

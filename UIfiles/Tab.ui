@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>hola</class>
- <widget class="QWidget" name="hola">
+ <class>tabs</class>
+ <widget class="QWidget" name="tabs">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1344</width>
-    <height>749</height>
+    <width>1300</width>
+    <height>729</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -23,7 +23,7 @@
    <string notr="true">background-color: rgb(255, 255, 255);</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
+   <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="minimumSize">
       <size>
@@ -634,11 +634,178 @@ color: #FFFFFF;</string>
       <attribute name="title">
        <string>Cabañas</string>
       </attribute>
+      <widget class="QWidget" name="gridLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>9</x>
+         <y>9</y>
+         <width>861</width>
+         <height>64</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">font: 57 18pt &quot;Ubuntu&quot;;
+font-weight:bold;</string>
+          </property>
+          <property name="text">
+           <string>Cabañas disponibles</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">font: 57 14pt &quot;Ubuntu&quot;;
+font-weight:bold;</string>
+            </property>
+            <property name="text">
+             <string>Fecha:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDateEdit" name="fecha">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color : #CDCDCD;
+color: rgb(0,0,0);</string>
+            </property>
+            <property name="dateTime">
+             <datetime>
+              <hour>0</hour>
+              <minute>0</minute>
+              <second>0</second>
+              <year>2020</year>
+              <month>12</month>
+              <day>28</day>
+             </datetime>
+            </property>
+            <property name="time">
+             <time>
+              <hour>0</hour>
+              <minute>0</minute>
+              <second>0</second>
+             </time>
+            </property>
+            <property name="calendarPopup">
+             <bool>true</bool>
+            </property>
+            <property name="timeSpec">
+             <enum>Qt::LocalTime</enum>
+            </property>
+            <property name="date">
+             <date>
+              <year>2020</year>
+              <month>12</month>
+              <day>28</day>
+             </date>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_date">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">font: 57 18pt &quot;Ubuntu&quot;;
+font-weight:bold;</string>
+          </property>
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Maximum</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>500</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="horizontalLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>9</x>
+         <y>79</y>
+         <width>801</width>
+         <height>211</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QTableWidget" name="tableWidgetC">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>90</number>
+          </attribute>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="verticalHeaderDefaultSectionSize">
+           <number>50</number>
+          </attribute>
+          <attribute name="verticalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QLabel" name="label_5">
        <property name="geometry">
         <rect>
-         <x>50</x>
-         <y>330</y>
+         <x>10</x>
+         <y>320</y>
          <width>139</width>
          <height>22</height>
         </rect>
@@ -657,196 +824,74 @@ font-weight:bold;</string>
         <string>Observaciones:</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_3">
+      <widget class="QWidget" name="horizontalLayoutWidget_3">
        <property name="geometry">
         <rect>
-         <x>40</x>
-         <y>20</y>
-         <width>233</width>
-         <height>28</height>
+         <x>10</x>
+         <y>590</y>
+         <width>165</width>
+         <height>31</height>
         </rect>
        </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 57 18pt &quot;Ubuntu&quot;;
-font-weight:bold;</string>
-       </property>
-       <property name="text">
-        <string>Cabañas disponibles</string>
-       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QPushButton" name="edp">
+          <property name="styleSheet">
+           <string notr="true">background-color: #3B83BD;
+font-size: 18px;
+/*border-radius: 8px;*/
+color: #FFFFFF;</string>
+          </property>
+          <property name="text">
+           <string>Editar precio </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </widget>
       <widget class="QTableWidget" name="tableWidgetCab">
        <property name="geometry">
         <rect>
-         <x>50</x>
-         <y>360</y>
-         <width>256</width>
-         <height>192</height>
+         <x>10</x>
+         <y>350</y>
+         <width>211</width>
+         <height>231</height>
         </rect>
        </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <attribute name="horizontalHeaderMinimumSectionSize">
+        <number>57</number>
+       </attribute>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>false</bool>
+       </attribute>
        <attribute name="verticalHeaderVisible">
         <bool>false</bool>
        </attribute>
        <attribute name="verticalHeaderDefaultSectionSize">
-        <number>57</number>
+        <number>67</number>
        </attribute>
-      </widget>
-      <widget class="QPushButton" name="edp">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>560</y>
-         <width>131</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: #3B83BD;
-font-size: 18px;
-/*border-radius: 8px;*/
-color: #FFFFFF;</string>
-       </property>
-       <property name="text">
-        <string>Editar precio </string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_4">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>70</y>
-         <width>58</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 57 14pt &quot;Ubuntu&quot;;
-font-weight:bold;</string>
-       </property>
-       <property name="text">
-        <string>Fecha:</string>
-       </property>
-      </widget>
-      <widget class="QDateEdit" name="fecha">
-       <property name="geometry">
-        <rect>
-         <x>120</x>
-         <y>70</y>
-         <width>87</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color : #CDCDCD;
-color: rgb(0,0,0);</string>
-       </property>
-       <property name="dateTime">
-        <datetime>
-         <hour>0</hour>
-         <minute>0</minute>
-         <second>0</second>
-         <year>2020</year>
-         <month>12</month>
-         <day>28</day>
-        </datetime>
-       </property>
-       <property name="time">
-        <time>
-         <hour>0</hour>
-         <minute>0</minute>
-         <second>0</second>
-        </time>
-       </property>
-       <property name="calendarPopup">
-        <bool>true</bool>
-       </property>
-       <property name="timeSpec">
-        <enum>Qt::LocalTime</enum>
-       </property>
-       <property name="date">
-        <date>
-         <year>2020</year>
-         <month>12</month>
-         <day>28</day>
-        </date>
-       </property>
-      </widget>
-      <widget class="QTableWidget" name="tableWidgetC">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>110</y>
-         <width>752</width>
-         <height>192</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <attribute name="horizontalHeaderStretchLastSection">
-        <bool>false</bool>
+       <attribute name="verticalHeaderMinimumSectionSize">
+        <number>21</number>
        </attribute>
-       <attribute name="verticalHeaderDefaultSectionSize">
-        <number>57</number>
-       </attribute>
-       <attribute name="verticalHeaderStretchLastSection">
-        <bool>true</bool>
-       </attribute>
-      </widget>
-      <widget class="QLabel" name="label_date">
-       <property name="geometry">
-        <rect>
-         <x>240</x>
-         <y>70</y>
-         <width>551</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 57 18pt &quot;Ubuntu&quot;;
-font-weight:bold;</string>
-       </property>
-       <property name="text">
-        <string>TextLabel</string>
-       </property>
       </widget>
      </widget>
     </widget>

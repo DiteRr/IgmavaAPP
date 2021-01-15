@@ -1,0 +1,51 @@
+#load both ui file
+uifile_1 = 'UIfiles/Tab.ui'
+form_1, base_1 = uic.loadUiType(uifile_1)
+
+uifile_2 = 'UIfiles/Rutmodal.ui'
+form_2, base_2 = uic.loadUiType(uifile_2)
+
+uifile_3 = 'UIfiles/EditUser.ui'
+form_editUser, base_editUser = uic.loadUiType(uifile_3)
+
+uifile_4 = 'UIfiles/addBooking.ui'
+form_addR, base_addR = uic.loadUiType(uifile_4)
+
+uifile_5 = 'UIfiles/newUser.ui'
+form_newUser, base_newUser = uic.loadUiType(uifile_5)
+
+uifile_6 = 'UIfiles/cabinsAvailable.ui'
+form_available, base_available = uic.loadUiType(uifile_6)
+
+uifile_7 = 'UIfiles/AceptarReserva.ui'
+form_reserva, base_reserva = uic.loadUiType(uifile_7)
+
+uifile_8 = 'UIfiles/UserBooking.ui'
+form_reservasUser, base_reservasUser = uic.loadUiType(uifile_8)
+
+uifile_9 = 'UIfiles/editBooking.ui'
+form_editReserva, base_editReserva = uic.loadUiType(uifile_9)
+
+uifile_10 = 'UIfiles/Booking_cabinsAvailable.ui'
+form_disp, base_disp = uic.loadUiType(uifile_10)
+
+uifile_11 = 'UIfiles/Booking_AceptarReserva.ui'
+form_acceptR, base_acceptR = uic.loadUiType(uifile_11)
+
+uifile_12 = 'UIfiles/obsCab.ui'
+form_obs, base_obs = uic.loadUiType(uifile_12)
+
+uifile_13 = 'UIfiles/Disable_cab.ui'
+form_desh, base_desh = uic.loadUiType(uifile_13)
+
+uifile_14 = 'UIfiles/Add_obsCab.ui'
+form_o, base_o = uic.loadUiType(uifile_14)
+
+uifile_15 = 'UIfiles/fixedUp.ui'
+form_arr, base_arr = uic.loadUiType(uifile_15)
+
+uifile_16 = 'UIfiles/editPrecio.ui'
+form_edp, base_edp = uic.loadUiType(uifile_16)
+
+uifile_17 = 'UIfiles/host.ui'
+form_ho, base_ho = uic.loadUiType(uifile_17)
